@@ -1,4 +1,4 @@
-package com.arjinmc.pulltorefresh.loadingview;
+package com.arjinmc.pulltorefresh.view;
 
 import android.content.Context;
 import android.os.Build;
@@ -12,22 +12,22 @@ import android.util.AttributeSet;
  * Created by Eminem Lo on 2018/5/30.
  * email: arjinmc@hotmail.com
  */
-public abstract class LoadingHeadView extends LoadingView {
+public abstract class LoadingHeadLayout extends LoadingLayout {
 
-    public LoadingHeadView(@NonNull Context context) {
+    public LoadingHeadLayout(@NonNull Context context) {
         super(context);
     }
 
-    public LoadingHeadView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public LoadingHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public LoadingHeadView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public LoadingHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public LoadingHeadView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public LoadingHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 }

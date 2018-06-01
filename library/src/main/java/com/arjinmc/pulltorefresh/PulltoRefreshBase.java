@@ -12,15 +12,16 @@ import android.widget.LinearLayout;
 
 import com.arjinmc.pulltorefresh.listener.OnLoadMoreListener;
 import com.arjinmc.pulltorefresh.listener.OnRefreshListener;
-import com.arjinmc.pulltorefresh.loadingview.LoadingFootView;
-import com.arjinmc.pulltorefresh.loadingview.LoadingHeadView;
+import com.arjinmc.pulltorefresh.view.LoadingFootLayout;
+import com.arjinmc.pulltorefresh.view.LoadingHeadLayout;
+import com.arjinmc.pulltorefresh.view.RetryLayout;
 
 /**
  * PulltoRefreshView
  * Created by Eminem Lo on 2018/5/30.
  * email: arjinmc@hotmail.com
  */
-public class PulltoRefreshView extends LinearLayout {
+public class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     //status
     private static final int STATUS_STANDER = 0;
@@ -39,31 +40,43 @@ public class PulltoRefreshView extends LinearLayout {
     @interface ModeType {
     }
 
-    private LoadingHeadView mHeadView;
-    private LoadingFootView mFootView;
-    private View mContentView;
+
+    public static final int DIRECTION_VERTICAL = 0;
+    public static final int DIRECTION_HORIZONATL = 1;
+
+    @IntDef({DIRECTION_VERTICAL, DIRECTION_HORIZONATL})
+    @interface DirectionType {
+    }
+
+    private LoadingHeadLayout mHeadView;
+    private LoadingFootLayout mFootView;
+    private View mEmptyView;
+    private RetryLayout mRetryView;
+
+    private T mContentView;
     private int mMode = MODE_BOTH;
+    private int mDirection = DIRECTION_VERTICAL;
 
     private OnLoadMoreListener mOnLoadMoreListener;
     private OnRefreshListener mOnRefreshListener;
 
-    public PulltoRefreshView(Context context) {
+    public PulltoRefreshBase(Context context) {
         super(context);
         init();
     }
 
-    public PulltoRefreshView(Context context, @Nullable AttributeSet attrs) {
+    public PulltoRefreshBase(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public PulltoRefreshView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public PulltoRefreshBase(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public PulltoRefreshView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public PulltoRefreshBase(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
@@ -73,16 +86,27 @@ public class PulltoRefreshView extends LinearLayout {
         setOrientation(LinearLayout.VERTICAL);
     }
 
-    public void setHeadView(LoadingHeadView headView) {
+    public void setHeadView(LoadingHeadLayout headView) {
         mHeadView = headView;
     }
 
-    public void setFootView(LoadingFootView footView) {
+    public void setFootView(LoadingFootLayout footView) {
         mFootView = footView;
+    }
+
+    public void resetViews() {
+        removeAllViews();
+        addView(mHeadView, new LayoutParams(LayoutParams.MATCH_PARENT, mHeadView.getMeasuredHeight()));
+        addView(mContentView);
+        addView(mFootView);
     }
 
     public void setMode(@ModeType int mode) {
         mMode = mode;
+    }
+
+    public void setDirection(@DirectionType int direction) {
+        mDirection = direction;
     }
 
     public void setOnRefreshListener(OnRefreshListener onRefreshListener) {

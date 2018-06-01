@@ -1,4 +1,4 @@
-package com.arjinmc.pulltorefresh.loadingview;
+package com.arjinmc.pulltorefresh.view;
 
 /**
  * Created by Eminem Lo on 2018/5/30.

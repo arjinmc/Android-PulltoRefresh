@@ -1,0 +1,7 @@
+<resources>
+    <string name="pull_to_refresh_pull_to_refresh">下拉刷新…</string>
+    <string name="pull_to_refresh_release_to_refresh">放开以刷新…</string>
+    <string name="pull_to_refresh_pull_to_load_more">上拉加载更多…</string>
+    <string name="pull_to_refresh_release_to_load_more">放开以加载更多…</string>
+    <string name="pull_to_refresh_loading">正在载入…</string>
+</resources>
