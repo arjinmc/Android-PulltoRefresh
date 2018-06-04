@@ -12,8 +12,8 @@ import android.widget.LinearLayout;
 
 import com.arjinmc.pulltorefresh.listener.OnLoadMoreListener;
 import com.arjinmc.pulltorefresh.listener.OnRefreshListener;
-import com.arjinmc.pulltorefresh.view.LoadingFootLayout;
-import com.arjinmc.pulltorefresh.view.LoadingHeadLayout;
+import com.arjinmc.pulltorefresh.view.PullFootLayout;
+import com.arjinmc.pulltorefresh.view.PullHeadLayout;
 import com.arjinmc.pulltorefresh.view.RetryLayout;
 
 /**
@@ -48,8 +48,8 @@ public class PulltoRefreshBase<T extends View> extends LinearLayout {
     @interface DirectionType {
     }
 
-    private LoadingHeadLayout mHeadView;
-    private LoadingFootLayout mFootView;
+    private PullHeadLayout mHeadView;
+    private PullFootLayout mFootView;
     private View mEmptyView;
     private RetryLayout mRetryView;
 
@@ -86,11 +86,11 @@ public class PulltoRefreshBase<T extends View> extends LinearLayout {
         setOrientation(LinearLayout.VERTICAL);
     }
 
-    public void setHeadView(LoadingHeadLayout headView) {
+    public void setHeadView(PullHeadLayout headView) {
         mHeadView = headView;
     }
 
-    public void setFootView(LoadingFootLayout footView) {
+    public void setFootView(PullFootLayout footView) {
         mFootView = footView;
     }
 

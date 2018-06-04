@@ -8,26 +8,27 @@ import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 
 /**
- * LoadingHeadView
+ * PullFootLayout
  * Created by Eminem Lo on 2018/5/30.
  * email: arjinmc@hotmail.com
  */
-public abstract class LoadingHeadLayout extends LoadingLayout {
+public abstract class PullFootLayout extends PullLayout {
 
-    public LoadingHeadLayout(@NonNull Context context) {
+    public PullFootLayout(@NonNull Context context) {
         super(context);
     }
 
-    public LoadingHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public PullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public LoadingHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public PullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public LoadingHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public PullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
+
 }
