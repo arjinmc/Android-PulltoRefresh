@@ -59,11 +59,6 @@ public class PullHeadLayout extends PullLayout {
     @Override
     public void onPulling(int pullMaxHeight, int currentHeight) {
         mIvLoading.setRotation(currentHeight % 360);
-        if (currentHeight < pullMaxHeight) {
-            mTvTips.setText(R.string.pull_to_refresh_pull_to_refresh);
-        } else {
-            mTvTips.setText(R.string.pull_to_refresh_release_to_refresh);
-        }
     }
 
     @Override
@@ -71,6 +66,15 @@ public class PullHeadLayout extends PullLayout {
 
         mTvTips.setText(R.string.pull_to_refresh_loading);
         startRotateAnimation();
+    }
+
+    @Override
+    public void onSwitchTips(boolean showReleaseTips) {
+        if (showReleaseTips) {
+            mTvTips.setText(R.string.pull_to_refresh_release_to_refresh);
+        } else {
+            mTvTips.setText(R.string.pull_to_refresh_pull_to_refresh);
+        }
     }
 
     @Override
@@ -104,6 +108,5 @@ public class PullHeadLayout extends PullLayout {
             mRotateAnimation = null;
         }
     }
-
 
 }

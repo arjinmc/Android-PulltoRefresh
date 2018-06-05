@@ -27,7 +27,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     private static final String LOG_TAG = "PulltoRefreshBase";
 
-    //status
+    //status of PulltoRefreshBase
     private static final int STATUS_STANDER = 0;
     private static final int STATUS_REFRESH_PULL = 1;
     private static final int STATUS_REFRESH_RELEASE = 2;
@@ -54,13 +54,24 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     private FrameLayout mContentWrapper;
 
     private T mContentView;
+    private int mStatus = STATUS_STANDER;
     private int mMode = MODE_BOTH;
     private int mOrientation = LinearLayout.VERTICAL;
     private int mPullHeight = 200;
 
     private int mHeadViewHeight;
     private int mFootViewHeight;
-    private int mPointDownY;
+    private float mPointDownY;
+    private float mMove;
+
+    // Runnable for headView to rewind for pulling to refresh
+    private Runnable mHeadViewRewindRunnable;
+    // Runnable for headView to start refresh
+    private Runnable mHeadViewStartRefreshRunnable;
+    //Runnable for footView to rewind for pulling to load more
+    private Runnable mFootViewRewindRunnable;
+    //Runnable for footView to start load more
+    private Runnable mFootViewStartRefreshRunnable;
 
     private OnLoadMoreListener mOnLoadMoreListener;
     private OnRefreshListener mOnRefreshListener;
@@ -132,9 +143,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * @param height
      */
     public void setPullHeight(int height) {
-        if (height <= 0) {
+        if (height <= 0 && (mPullHeight > mHeadViewHeight + 20 || mPullHeight > mFootViewHeight + 20)) {
             try {
-                throw new IllegalAccessException("Pull height must be above zero");
+                throw new IllegalAccessException(
+                        "Pull height must be above zero and bigger than headViewHeight/footViewHeight");
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 return;
@@ -154,7 +166,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         }
 
-
         if (mFootView != null && (mMode == MODE_LOAD_MORE || mMode == MODE_BOTH)) {
             if (mFootView.getParent() != null) {
                 removeView(mFootView);
@@ -166,6 +177,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         mHeadView.measure(0, 0);
         mHeadViewHeight = mHeadView.getMeasuredHeight();
 
+//        mFootView.measure(0, 0);
 //        mFootViewHeight = mFootView.getHeight();
 
         refreshLoadingViewsSize();
@@ -234,24 +246,74 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 //    }
 
     protected boolean shouldShowHeadView() {
+        if (isContentOnTop() && mStatus == STATUS_REFRESH_PULL) {
+            return true;
+        }
         return false;
     }
 
     protected boolean shouldShowFootView() {
+        if (isContentOnBottom() && mStatus == STATUS_LOAD_MORE_PULL) {
+            return true;
+        }
         return false;
+    }
+
+    /**
+     * check content is on the top
+     *
+     * @return
+     */
+    protected boolean isContentOnTop() {
+        if (mContentWrapper.getTop() == 0) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * check content is on the bottom
+     *
+     * @return
+     */
+    protected boolean isContentOnBottom() {
+        if (mContentWrapper.getBottom() == 0) {
+            return true;
+        }
+        return false;
+    }
+
+    protected void pullHeadView() {
+        if (mStatus != STATUS_REFRESH_PULL) {
+            refreshLoadingViewsSize();
+        }
+        scrollTo(0, (int) mMove);
+        int headViewMove = (int) Math.abs(mMove);
+        if (headViewMove >= mHeadViewHeight) {
+            mHeadView.onSwitchTips(true);
+        } else {
+            mHeadView.onSwitchTips(false);
+        }
+        mHeadView.onPulling(mPullHeight, headViewMove);
+
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.e(LOG_TAG, "onTouchEvent:DOWN");
+                Log.d(LOG_TAG, "onTouchEvent:DOWN");
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.e(LOG_TAG, "onTouchEvent:MOVE");
+                Log.d(LOG_TAG, "onTouchEvent:MOVE");
+                float alter = mPointDownY - event.getY();
+                mMove += alter;
+                pullHeadView();
+                mPointDownY = event.getY();
                 break;
             case MotionEvent.ACTION_UP:
-                Log.e(LOG_TAG, "onTouchEvent:UP");
+                Log.d(LOG_TAG, "onTouchEvent:UP");
+                mPointDownY = 0;
                 break;
         }
 //        return super.onTouchEvent(event);
@@ -262,16 +324,37 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.e(LOG_TAG, "onInterceptTouchEvent:DOWN");
+                Log.d(LOG_TAG, "onInterceptTouchEvent:DOWN");
+                if (isContentOnTop()) {
+                    mPointDownY = ev.getY();
+                }
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.e(LOG_TAG, "onInterceptTouchEvent:MOVE");
+                Log.d(LOG_TAG, "onInterceptTouchEvent:MOVE");
+                float alter = mPointDownY - ev.getY();
+                mMove += alter;
+                if (mPointDownY > 0) {
+                    if (mStatus == STATUS_STANDER) {
+                        mStatus = STATUS_REFRESH_PULL;
+                    }
+                }
+                if (mStatus == STATUS_REFRESH_PULL) {
+                    return true;
+                }
+                mPointDownY = ev.getY();
                 break;
             case MotionEvent.ACTION_UP:
-                Log.e(LOG_TAG, "onInterceptTouchEvent:UP");
+                Log.d(LOG_TAG, "onInterceptTouchEvent:UP");
                 break;
         }
 //        return super.onInterceptTouchEvent(ev);
         return false;
+    }
+
+    /**
+     * reset the status
+     */
+    public final void onRefreshComplete() {
+        mStatus = STATUS_STANDER;
     }
 }

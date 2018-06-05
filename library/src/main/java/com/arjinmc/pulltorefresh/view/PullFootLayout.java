@@ -45,4 +45,9 @@ public class PullFootLayout extends PullLayout {
     public void onLoading() {
 
     }
+
+    @Override
+    public void onSwitchTips(boolean showReleaseTips) {
+
+    }
 }

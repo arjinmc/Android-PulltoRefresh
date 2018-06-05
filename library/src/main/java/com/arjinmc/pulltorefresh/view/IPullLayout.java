@@ -11,4 +11,6 @@ public interface IPullLayout {
     void onReset();
 
     void onLoading();
+
+    void onSwitchTips(boolean showReleaseTips);
 }
