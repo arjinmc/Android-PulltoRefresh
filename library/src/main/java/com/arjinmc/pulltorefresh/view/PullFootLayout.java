@@ -12,7 +12,7 @@ import android.util.AttributeSet;
  * Created by Eminem Lo on 2018/5/30.
  * email: arjinmc@hotmail.com
  */
-public abstract class PullFootLayout extends PullLayout {
+public class PullFootLayout extends PullLayout {
 
     public PullFootLayout(@NonNull Context context) {
         super(context);
@@ -31,4 +31,18 @@ public abstract class PullFootLayout extends PullLayout {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+    @Override
+    public void onPulling(int pullMaxHeight, int currentHeight) {
+
+    }
+
+    @Override
+    public void onReset() {
+
+    }
+
+    @Override
+    public void onLoading() {
+
+    }
 }

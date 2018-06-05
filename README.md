@@ -1,6 +1,24 @@
 # Android-PulltoRefresh
 PulltoRefreshView for Android
 
+Reference to [Android-PullToRefresh](https://github.com/chrisbanes/Android-PullToRefresh) by Chris Banes
+
+## Features
+Supports both Pulling Down from the top, and Pulling Up from the bottom (or even both).
+Animated Scrolling for all devices.
+Over Scroll supports for devices on Android v2.3+.
+Currently works with:
+
+- [x] RecyclerView
+- [x] ScrollView
+- [x] WebView
+- [x] NestScrollView
+- [x] ListView
+- [x] ExpandableListView
+- [x] GridView
+- [x] HorizontalScrollView
+- [x] ViewPager
+
 ```code
    Copyright 2018 arjinmc
 

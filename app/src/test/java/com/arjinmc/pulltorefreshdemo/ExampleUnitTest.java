@@ -1,4 +1,4 @@
-package com.arjinmc.pulltorefresh;
+package com.arjinmc.pulltorefreshdemo;
 
 import org.junit.Test;
 

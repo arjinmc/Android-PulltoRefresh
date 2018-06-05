@@ -1,33 +1,109 @@
 package com.arjinmc.pulltorefresh.view;
 
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.arjinmc.pulltorefresh.R;
 
 /**
  * PullHeadLayout
  * Created by Eminem Lo on 2018/5/30.
  * email: arjinmc@hotmail.com
  */
-public abstract class PullHeadLayout extends PullLayout {
+public class PullHeadLayout extends PullLayout {
+
+    private ImageView mIvLoading;
+    private TextView mTvTips;
+    private ValueAnimator mRotateAnimation;
 
     public PullHeadLayout(@NonNull Context context) {
         super(context);
+        init();
     }
 
     public PullHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
+        init();
     }
 
     public PullHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public PullHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        init();
     }
+
+    private void init() {
+
+        View view = LayoutInflater.from(getContext()).inflate(R.layout.pull_to_refresh_header_vertical, null);
+        mIvLoading = view.findViewById(R.id.iv_loading);
+        mTvTips = view.findViewById(R.id.tv_tips);
+        addView(view, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        requestLayout();
+    }
+
+    @Override
+    public void onPulling(int pullMaxHeight, int currentHeight) {
+        mIvLoading.setRotation(currentHeight % 360);
+        if (currentHeight < pullMaxHeight) {
+            mTvTips.setText(R.string.pull_to_refresh_pull_to_refresh);
+        } else {
+            mTvTips.setText(R.string.pull_to_refresh_release_to_refresh);
+        }
+    }
+
+    @Override
+    public void onLoading() {
+
+        mTvTips.setText(R.string.pull_to_refresh_loading);
+        startRotateAnimation();
+    }
+
+    @Override
+    public void onReset() {
+
+        stopRotateAnimation();
+        mIvLoading.setRotation(0);
+    }
+
+    public void startRotateAnimation() {
+
+        if (mRotateAnimation == null) {
+            mRotateAnimation = ValueAnimator.ofFloat(0, 1).setDuration(1000);
+            mRotateAnimation.setRepeatCount(0);
+            mRotateAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    mIvLoading.setRotation((float) animation.getAnimatedValue());
+                }
+            });
+        }
+        if (!mRotateAnimation.isRunning()) {
+            mRotateAnimation.start();
+        }
+    }
+
+    public void stopRotateAnimation() {
+
+        if (mRotateAnimation != null) {
+            mRotateAnimation.cancel();
+            mRotateAnimation = null;
+        }
+    }
+
+
 }

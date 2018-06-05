@@ -6,8 +6,10 @@ import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 
 import com.arjinmc.pulltorefresh.listener.OnLoadMoreListener;
@@ -21,7 +23,9 @@ import com.arjinmc.pulltorefresh.view.RetryLayout;
  * Created by Eminem Lo on 2018/5/30.
  * email: arjinmc@hotmail.com
  */
-public class PulltoRefreshBase<T extends View> extends LinearLayout {
+public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
+
+    private static final String LOG_TAG = "PulltoRefreshBase";
 
     //status
     private static final int STATUS_STANDER = 0;
@@ -40,73 +44,166 @@ public class PulltoRefreshBase<T extends View> extends LinearLayout {
     @interface ModeType {
     }
 
-
-    public static final int DIRECTION_VERTICAL = 0;
-    public static final int DIRECTION_HORIZONATL = 1;
-
-    @IntDef({DIRECTION_VERTICAL, DIRECTION_HORIZONATL})
-    @interface DirectionType {
-    }
+    public static final int SMOOTH_SCROLL_DURATION_MS = 200;
+    public static final int SMOOTH_SCROLL_LONG_DURATION_MS = 325;
 
     private PullHeadLayout mHeadView;
     private PullFootLayout mFootView;
     private View mEmptyView;
     private RetryLayout mRetryView;
+    private FrameLayout mContentWrapper;
 
     private T mContentView;
     private int mMode = MODE_BOTH;
-    private int mDirection = DIRECTION_VERTICAL;
+    private int mOrientation = LinearLayout.VERTICAL;
+    private int mPullHeight = 200;
+
+    private int mHeadViewHeight;
+    private int mFootViewHeight;
+    private int mPointDownY;
 
     private OnLoadMoreListener mOnLoadMoreListener;
     private OnRefreshListener mOnRefreshListener;
 
     public PulltoRefreshBase(Context context) {
         super(context);
-        init();
+        init(context, null);
     }
 
     public PulltoRefreshBase(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init();
+        init(context, attrs);
     }
 
     public PulltoRefreshBase(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init();
+        init(context, attrs);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public PulltoRefreshBase(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        init();
+        init(context, attrs);
     }
 
-    private void init() {
+    private void init(Context context, AttributeSet attrs) {
 
-        setOrientation(LinearLayout.VERTICAL);
+        setOrientation(mOrientation);
+
+        mContentView = createContentView(context, attrs);
+        addContentView(context, mContentView);
+
+        //init head and foot
+        mHeadView = new PullHeadLayout(context, attrs);
+//        mFootView = new PullFootLayout(context,attrs);
+        updateUI();
+    }
+
+    private void addContentView(Context context, T contentView) {
+        mContentWrapper = new FrameLayout(context);
+        mContentWrapper.setLayoutParams(new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        mContentWrapper.addView(contentView, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        addView(mContentWrapper, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT,
+                LayoutParams.MATCH_PARENT));
+
     }
 
     public void setHeadView(PullHeadLayout headView) {
+        if (mHeadView != null && mHeadView.getParent() != null) {
+            removeView(mHeadView);
+        }
         mHeadView = headView;
+        updateUI();
     }
 
     public void setFootView(PullFootLayout footView) {
+        if (mFootView != null && mFootView.getParent() != null) {
+            removeView(mFootView);
+        }
         mFootView = footView;
+        updateUI();
+    }
+
+    /**
+     * set the height should be pull
+     *
+     * @param height
+     */
+    public void setPullHeight(int height) {
+        if (height <= 0) {
+            try {
+                throw new IllegalAccessException("Pull height must be above zero");
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+        mPullHeight = height;
+    }
+
+    protected final void updateUI() {
+
+        if (mHeadView != null && (mMode == MODE_REFRESH || mMode == MODE_BOTH)) {
+            if (mHeadView.getParent() != null) {
+                removeView(mHeadView);
+            }
+            addView(mHeadView, 0, new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+        }
+
+
+        if (mFootView != null && (mMode == MODE_LOAD_MORE || mMode == MODE_BOTH)) {
+            if (mFootView.getParent() != null) {
+                removeView(mFootView);
+            }
+            addView(mHeadView, new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+        }
+
+        mHeadView.measure(0, 0);
+        mHeadViewHeight = mHeadView.getMeasuredHeight();
+
+//        mFootViewHeight = mFootView.getHeight();
+
+        refreshLoadingViewsSize();
+    }
+
+    /**
+     * hide or show loading
+     */
+    protected final void refreshLoadingViewsSize() {
+
+        int paddingL = getPaddingLeft();
+        int paddingR = getPaddingRight();
+
+        int paddingT = getPaddingTop();
+        int paddingB = getPaddingBottom();
+
+        if (shouldShowHeadView()) {
+            paddingT = 0;
+        } else {
+            paddingT = -mHeadViewHeight;
+        }
+
+        if (shouldShowFootView()) {
+            paddingB = 0;
+        } else {
+            paddingB = -mFootViewHeight;
+        }
+        setPadding(paddingL, paddingT, paddingR, paddingB);
+
     }
 
     public void resetViews() {
         removeAllViews();
-        addView(mHeadView, new LayoutParams(LayoutParams.MATCH_PARENT, mHeadView.getMeasuredHeight()));
-        addView(mContentView);
-        addView(mFootView);
+        updateUI();
     }
 
     public void setMode(@ModeType int mode) {
         mMode = mode;
-    }
-
-    public void setDirection(@DirectionType int direction) {
-        mDirection = direction;
     }
 
     public void setOnRefreshListener(OnRefreshListener onRefreshListener) {
@@ -117,18 +214,64 @@ public class PulltoRefreshBase<T extends View> extends LinearLayout {
         mOnLoadMoreListener = onLoadMoreListener;
     }
 
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    protected abstract T createContentView(Context context, AttributeSet attrs);
+
+    public final T getContentView() {
+        return mContentView;
+    }
+
+//    @Override
+//    public void addView(View child, int index, ViewGroup.LayoutParams params) {
+//        Log.d(LOG_TAG, "addView: " + child.getClass().getSimpleName());
+//
+//        final T refreshableView = getContentView();
+//
+//        if (refreshableView instanceof ViewGroup) {
+//            ((ViewGroup) refreshableView).addView(child, index, params);
+//        } else {
+//            throw new UnsupportedOperationException("Refreshable View is not a ViewGroup so can't addView");
+//        }
+//    }
+
+    protected boolean shouldShowHeadView() {
+        return false;
+    }
+
+    protected boolean shouldShowFootView() {
+        return false;
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        return super.onTouchEvent(event);
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                Log.e(LOG_TAG, "onTouchEvent:DOWN");
+                break;
+            case MotionEvent.ACTION_MOVE:
+                Log.e(LOG_TAG, "onTouchEvent:MOVE");
+                break;
+            case MotionEvent.ACTION_UP:
+                Log.e(LOG_TAG, "onTouchEvent:UP");
+                break;
+        }
+//        return super.onTouchEvent(event);
+        return true;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        return super.onInterceptTouchEvent(ev);
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                Log.e(LOG_TAG, "onInterceptTouchEvent:DOWN");
+                break;
+            case MotionEvent.ACTION_MOVE:
+                Log.e(LOG_TAG, "onInterceptTouchEvent:MOVE");
+                break;
+            case MotionEvent.ACTION_UP:
+                Log.e(LOG_TAG, "onInterceptTouchEvent:UP");
+                break;
+        }
+//        return super.onInterceptTouchEvent(ev);
+        return false;
     }
 }

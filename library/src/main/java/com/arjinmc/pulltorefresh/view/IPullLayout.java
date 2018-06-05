@@ -6,9 +6,7 @@ package com.arjinmc.pulltorefresh.view;
  */
 public interface IPullLayout {
 
-    void onPulling(int height);
-
-    void onRelease();
+    void onPulling(int pullMaxHeight, int currentHeight);
 
     void onReset();
 

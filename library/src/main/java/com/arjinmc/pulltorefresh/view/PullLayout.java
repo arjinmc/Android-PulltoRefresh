@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 
 /**
  * LoadingView
@@ -14,6 +15,8 @@ import android.widget.FrameLayout;
  * email: arjinmc@hotmail.com
  */
 public abstract class PullLayout extends FrameLayout implements IPullLayout {
+
+    protected int mOrientation;
 
     public PullLayout(@NonNull Context context) {
         super(context);
@@ -30,5 +33,20 @@ public abstract class PullLayout extends FrameLayout implements IPullLayout {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public PullLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+    }
+
+    public void setOrientation(int orientation) {
+
+        if (orientation != LinearLayout.HORIZONTAL || orientation != LinearLayout.VERTICAL) {
+            try {
+                throw new IllegalAccessException("Only support LinearLayout Orientation!");
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
+        mOrientation = orientation;
+
     }
 }
