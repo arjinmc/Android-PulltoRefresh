@@ -235,6 +235,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     protected abstract T createContentView(Context context, AttributeSet attrs);
 
+    protected abstract boolean isReadyToRefresh();
+
+    protected abstract boolean isReadyToLoadMore();
+
     public final T getContentView() {
         return mContentView;
     }
@@ -323,7 +327,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     public boolean onTouchEvent(MotionEvent event) {
         Log.d("onTouchEvent", "status:" + mStatus);
         if (mStatus == STATUS_REFRESHING) {
-            return false;
+            return true;
         }
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
@@ -395,17 +399,12 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 break;
             case MotionEvent.ACTION_MOVE:
                 Log.d(LOG_TAG, "onInterceptTouchEvent:MOVE");
-                float oldMove = mMove;
                 float alter = mPointDownY - ev.getY();
                 mMove += alter;
                 mPointDownY = ev.getY();
                 if (mMove < 0) {
-                    if (mStatus == STATUS_STANDER && oldMove == 0f) {
+                    if (mStatus == STATUS_STANDER && isReadyToRefresh()) {
                         mStatus = STATUS_REFRESH_PULL;
-                    } else {
-                        mMove = 0;
-                        mPointDownY = 0;
-                        return false;
                     }
                 }
                 if (mStatus == STATUS_REFRESH_PULL
@@ -425,7 +424,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * reset the status
      */
     public final void onRefreshComplete() {
-        mStatus = STATUS_STANDER;
         if (mMove < 0) {
             if (mHeadViewRewindRunnable == null) {
                 mHeadViewRewindRunnable = new HeadViewRewindRunnable();
@@ -498,10 +496,12 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             if (mMove != -mHeadViewHeight) {
                 ViewCompat.postOnAnimation(mHeadView, this);
             } else {
-                mStatus = STATUS_REFRESHING;
-                mHeadView.onLoading();
-                if (mOnRefreshListener != null) {
-                    mOnRefreshListener.onRefresh();
+                if (mStatus == STATUS_REFRESH_PULL) {
+                    mStatus = STATUS_REFRESHING;
+                    mHeadView.onLoading();
+                    if (mOnRefreshListener != null) {
+                        mOnRefreshListener.onRefresh();
+                    }
                 }
             }
         }
