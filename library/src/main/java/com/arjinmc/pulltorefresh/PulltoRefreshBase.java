@@ -395,15 +395,21 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 break;
             case MotionEvent.ACTION_MOVE:
                 Log.d(LOG_TAG, "onInterceptTouchEvent:MOVE");
+                float oldMove = mMove;
                 float alter = mPointDownY - ev.getY();
                 mMove += alter;
                 mPointDownY = ev.getY();
                 if (mMove < 0) {
-                    if (mStatus == STATUS_STANDER) {
+                    if (mStatus == STATUS_STANDER && oldMove == 0f) {
                         mStatus = STATUS_REFRESH_PULL;
+                    } else {
+                        mMove = 0;
+                        mPointDownY = 0;
+                        return false;
                     }
                 }
-                if (mStatus == STATUS_REFRESH_PULL) {
+                if (mStatus == STATUS_REFRESH_PULL
+                        || mStatus == STATUS_LOAD_MORE_PULL) {
                     return true;
                 }
                 break;
