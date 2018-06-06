@@ -2,7 +2,9 @@ package com.arjinmc.pulltorefreshdemo;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -11,6 +13,7 @@ import com.arjinmc.expandrecyclerview.adapter.RecyclerViewSingleTypeProcessor;
 import com.arjinmc.expandrecyclerview.adapter.RecyclerViewViewHolder;
 import com.arjinmc.expandrecyclerview.style.RecyclerViewStyleHelper;
 import com.arjinmc.pulltorefresh.PulltoRefreshRecyclerView;
+import com.arjinmc.pulltorefresh.listener.OnRefreshListener;
 import com.arjinmc.recyclerviewdecoration.RecyclerViewItemDecoration;
 
 import java.util.ArrayList;
@@ -18,13 +21,20 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = "MainActivity";
+
     private PulltoRefreshRecyclerView mPtrRecyclerView;
     private List<String> mDataList;
+
+    private Handler mHandler = new Handler();
+    private RefreshFinishRunnable mRefreshFinishRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mRefreshFinishRunnable = new RefreshFinishRunnable();
 
         mPtrRecyclerView = findViewById(R.id.ptr_recyclerview);
         mDataList = new ArrayList<>();
@@ -48,5 +58,22 @@ public class MainActivity extends AppCompatActivity {
                 tvText.setText(data);
             }
         }));
+
+        mPtrRecyclerView.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+                mHandler.postDelayed(mRefreshFinishRunnable, 2000);
+            }
+        });
+    }
+
+    private class RefreshFinishRunnable implements Runnable {
+
+        @Override
+        public void run() {
+            Log.e(TAG, "mPtrRecyclerView.onRefreshComplete");
+            mPtrRecyclerView.onRefreshComplete();
+        }
     }
 }

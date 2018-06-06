@@ -82,17 +82,22 @@ public class PullHeadLayout extends PullLayout {
 
         stopRotateAnimation();
         mIvLoading.setRotation(0);
+        mTvTips.setText(R.string.pull_to_refresh_pull_to_refresh);
     }
 
     public void startRotateAnimation() {
 
         if (mRotateAnimation == null) {
-            mRotateAnimation = ValueAnimator.ofFloat(0, 1).setDuration(1000);
-            mRotateAnimation.setRepeatCount(0);
+            mRotateAnimation = ValueAnimator.ofInt(0, 360).setDuration(1000);
+
+            mRotateAnimation.setRepeatCount(ValueAnimator.INFINITE);
             mRotateAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
                 @Override
                 public void onAnimationUpdate(ValueAnimator animation) {
-                    mIvLoading.setRotation((float) animation.getAnimatedValue());
+                    float currentValue = Float.valueOf((int) animation.getAnimatedValue());
+                    if (mIvLoading.getRotation() != currentValue) {
+                        mIvLoading.setRotation(currentValue);
+                    }
                 }
             });
         }
