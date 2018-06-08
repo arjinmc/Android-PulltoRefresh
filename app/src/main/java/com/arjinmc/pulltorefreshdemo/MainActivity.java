@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         mPtrRecyclerView = findViewById(R.id.ptr_recyclerview);
         mDataList = new ArrayList<>();
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 15; i++) {
             mDataList.add("item " + i);
         }
 

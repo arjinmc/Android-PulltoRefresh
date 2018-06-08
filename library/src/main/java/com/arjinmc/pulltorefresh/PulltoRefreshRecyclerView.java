@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -47,7 +48,7 @@ public class PulltoRefreshRecyclerView extends PulltoRefreshBase<RecyclerView> {
 //        RecyclerView.LayoutManager layoutManager  = recyclerView.getLayoutManager();
 //        layoutManager.getLayoutDirection() == LinearLayoutManager
         if (!recyclerView.canScrollVertically(-1)) {
-            Log.e("isReadyToRefresh", "true");
+            Log.d("isReadyToRefresh", "true");
             return true;
         }
         return false;
@@ -56,9 +57,17 @@ public class PulltoRefreshRecyclerView extends PulltoRefreshBase<RecyclerView> {
     @Override
     protected boolean isReadyToLoadMore() {
         RecyclerView recyclerView = getContentView();
-        if (!recyclerView.canScrollVertically(1)) {
-            Log.e("isReadyToLoadMore", "true");
-            return true;
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+        if (layoutManager instanceof LinearLayoutManager) {
+            if (((LinearLayoutManager) layoutManager).getOrientation() == LinearLayoutManager.VERTICAL) {
+                if (((LinearLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition()
+                        == recyclerView.getAdapter().getItemCount() - 1) {
+                    Log.e("isReadyToLoadMore", "true");
+                    return true;
+                }
+            } else {
+
+            }
         }
         return false;
     }

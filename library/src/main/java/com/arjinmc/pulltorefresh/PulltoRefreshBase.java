@@ -22,6 +22,8 @@ import com.arjinmc.pulltorefresh.view.PullHeadLayout;
 import com.arjinmc.pulltorefresh.view.PullLayout;
 import com.arjinmc.pulltorefresh.view.RetryLayout;
 
+import static com.arjinmc.pulltorefresh.BuildConfig.DEBUG;
+
 /**
  * PulltoRefreshView
  * Created by Eminem Lo on 2018/5/30.
@@ -110,7 +112,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         //init head and foot
         mHeadView = new PullHeadLayout(context, attrs);
-//        mFootView = new PullFootLayout(context,attrs);
+        mFootView = new PullFootLayout(context, attrs);
         updateUI();
     }
 
@@ -168,21 +170,20 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             addView(mHeadView, 0, new LinearLayout.LayoutParams(
                     LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
+            mHeadView.measure(0, 0);
+            mHeadViewHeight = mHeadView.getMeasuredHeight();
         }
 
         if (mFootView != null && (mMode == MODE_LOAD_MORE || mMode == MODE_BOTH)) {
             if (mFootView.getParent() != null) {
                 removeView(mFootView);
             }
-            addView(mHeadView, new LinearLayout.LayoutParams(
-                    LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+            mFootView.measure(0, 0);
+            mFootViewHeight = mFootView.getMeasuredHeight();
+
+            addView(mFootView, new LinearLayout.LayoutParams(
+                    LayoutParams.MATCH_PARENT, mFootViewHeight));
         }
-
-        mHeadView.measure(0, 0);
-        mHeadViewHeight = mHeadView.getMeasuredHeight();
-
-//        mFootView.measure(0, 0);
-//        mFootViewHeight = mFootView.getHeight();
 
         refreshLoadingViewsSize();
     }
@@ -204,11 +205,12 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             paddingT = -mHeadViewHeight;
         }
 
-        if (shouldShowFootView()) {
-            paddingB = 0;
-        } else {
-            paddingB = -mFootViewHeight;
-        }
+//        if (shouldShowFootView()) {
+//            paddingB = 0;
+//        } else {
+//            paddingB = -mFootViewHeight;
+//
+//        }
         setPadding(paddingL, paddingT, paddingR, paddingB);
 
     }
@@ -254,38 +256,14 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 //    }
 
     protected boolean shouldShowHeadView() {
-        if (isContentOnTop() && mStatus == STATUS_REFRESH_PULL) {
+        if (isReadyToRefresh() && mStatus == STATUS_REFRESH_PULL) {
             return true;
         }
         return false;
     }
 
     protected boolean shouldShowFootView() {
-        if (isContentOnBottom() && mStatus == STATUS_LOAD_MORE_PULL) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * check content is on the top
-     *
-     * @return
-     */
-    protected boolean isContentOnTop() {
-        if (mContentWrapper.getTop() == 0) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * check content is on the bottom
-     *
-     * @return
-     */
-    protected boolean isContentOnBottom() {
-        if (mContentWrapper.getBottom() == 0) {
+        if (isReadyToLoadMore() && mStatus == STATUS_LOAD_MORE_PULL) {
             return true;
         }
         return false;
@@ -318,6 +296,24 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      */
     protected void updateFootView() {
 
+        if (mStatus != STATUS_LOAD_MORE_PULL) {
+            refreshLoadingViewsSize();
+        }
+
+        Log.e("move", mMove + "");
+        scrollTo(0, (int) mMove);
+        mFootView.requestLayout();
+        int footViewMove = (int) Math.abs(mMove);
+        if (footViewMove >= mFootViewHeight) {
+            if (!mFootViewShowReleaseTips) {
+                mFootViewShowReleaseTips = true;
+                mFootView.onSwitchTips(true);
+            }
+        } else if (mFootViewShowReleaseTips) {
+            mFootViewShowReleaseTips = false;
+            mFootView.onSwitchTips(false);
+        }
+        mFootView.onPulling(mPullHeight, footViewMove);
     }
 
     @Override
@@ -329,13 +325,14 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 Log.d(LOG_TAG, "onTouchEvent:DOWN");
-                if (isContentOnTop()) {
+                if (isReadyToRefresh() || isReadyToLoadMore()) {
                     mPointDownY = event.getY();
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 Log.d(LOG_TAG, "onTouchEvent:MOVE");
-                if (mStatus != STATUS_REFRESH_PULL) {
+                if (!(mStatus == STATUS_REFRESH_PULL
+                        || mStatus == STATUS_LOAD_MORE_PULL)) {
                     return false;
                 }
                 float alter = mPointDownY - event.getY();
@@ -351,6 +348,11 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 } else if (mMove == 0f) {
                     mStatus = STATUS_STANDER;
                 } else {
+                    //control for the border
+                    if (Math.abs(mMove) >= mPullHeight) {
+                        mMove = mPullHeight;
+                        return false;
+                    }
                     updateFootView();
                 }
 
@@ -390,7 +392,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 Log.d(LOG_TAG, "onInterceptTouchEvent:DOWN");
-                if (isContentOnTop()) {
+                if (isReadyToRefresh() || isReadyToLoadMore()) {
                     mPointDownY = ev.getY();
                 }
                 break;
@@ -402,6 +404,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 if (mMove < 0) {
                     if (mStatus == STATUS_STANDER && isReadyToRefresh()) {
                         mStatus = STATUS_REFRESH_PULL;
+                    }
+                } else if (mMode == 0) {
+                    if (mStatus == STATUS_STANDER && isReadyToLoadMore()) {
+                        mStatus = STATUS_LOAD_MORE_PULL;
                     }
                 }
                 if (mStatus == STATUS_REFRESH_PULL
@@ -415,6 +421,30 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         }
 //        return super.onInterceptTouchEvent(ev);
         return false;
+    }
+
+    @Override
+    protected final void onSizeChanged(int w, int h, int oldw, int oldh) {
+        if (DEBUG) {
+            Log.d(LOG_TAG, String.format("onSizeChanged. W: %d, H: %d", w, h));
+        }
+
+        super.onSizeChanged(w, h, oldw, oldh);
+
+        refreshLoadingViewsSize();
+
+        mContentWrapper.requestLayout();
+
+        /**
+         * As we're currently in a Layout Pass, we need to schedule another one
+         * to layout any changes we've made here
+         */
+        post(new Runnable() {
+            @Override
+            public void run() {
+                requestLayout();
+            }
+        });
     }
 
     /**

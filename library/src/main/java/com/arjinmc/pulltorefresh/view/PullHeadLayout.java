@@ -52,6 +52,7 @@ public class PullHeadLayout extends PullLayout {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.pull_to_refresh_header_vertical, null);
         mIvLoading = view.findViewById(R.id.iv_loading);
         mTvTips = view.findViewById(R.id.tv_tips);
+        mTvTips.setText(R.string.pull_to_refresh_pull_to_refresh);
         addView(view, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         requestLayout();
     }
