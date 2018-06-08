@@ -34,11 +34,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     //status of PulltoRefreshBase
     private static final int STATUS_STANDER = 0;
     private static final int STATUS_REFRESH_PULL = 1;
-    private static final int STATUS_REFRESH_RELEASE = 2;
-    private static final int STATUS_REFRESHING = 3;
-    private static final int STATUS_LOAD_MORE_PULL = 4;
-    private static final int STATUS_LOAD_MORE_RELEASE = 5;
-    private static final int STATUS_LOAD_MORE_LOADING = 6;
+    private static final int STATUS_REFRESHING = 2;
+    private static final int STATUS_LOAD_MORE_PULL = 3;
+    private static final int STATUS_LOAD_MORE_LOADING = 4;
 
     public static final int MODE_BOTH = 0;
     public static final int MODE_REFRESH = 1;
@@ -48,8 +46,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     @interface ModeType {
     }
 
-    public static final int SMOOTH_SCROLL_DURATION_MS = 200;
-    public static final int SMOOTH_SCROLL_LONG_DURATION_MS = 325;
+    public static final int SMOOTH_REWIND_DURATION_MS = 100;
 
     private PullLayout mHeadView;
     private PullLayout mFootView;
@@ -450,7 +447,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
             if (mMove <= 0) {
                 float deltaY = Math.abs(mMove)
-                        * interpolator.getInterpolation(SMOOTH_SCROLL_DURATION_MS / 1000f);
+                        * interpolator.getInterpolation(SMOOTH_REWIND_DURATION_MS / 1000f);
                 mMove += deltaY;
                 if (Math.round(deltaY) == 0) {
                     mMove = 0;
@@ -484,7 +481,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
             if (!(mMove >= 0)) {
                 float deltaY = (Math.abs(mMove) - mHeadViewHeight)
-                        * interpolator.getInterpolation(SMOOTH_SCROLL_DURATION_MS / 1000f);
+                        * interpolator.getInterpolation(SMOOTH_REWIND_DURATION_MS / 1000f);
                 mMove += deltaY;
                 if (Math.round(deltaY) == 0) {
                     mMove = -mHeadViewHeight;
