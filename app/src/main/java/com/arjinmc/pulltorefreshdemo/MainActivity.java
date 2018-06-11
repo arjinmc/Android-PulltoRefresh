@@ -13,6 +13,7 @@ import com.arjinmc.expandrecyclerview.adapter.RecyclerViewSingleTypeProcessor;
 import com.arjinmc.expandrecyclerview.adapter.RecyclerViewViewHolder;
 import com.arjinmc.expandrecyclerview.style.RecyclerViewStyleHelper;
 import com.arjinmc.pulltorefresh.PulltoRefreshRecyclerView;
+import com.arjinmc.pulltorefresh.listener.OnLoadMoreListener;
 import com.arjinmc.pulltorefresh.listener.OnRefreshListener;
 import com.arjinmc.recyclerviewdecoration.RecyclerViewItemDecoration;
 
@@ -38,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
 
         mPtrRecyclerView = findViewById(R.id.ptr_recyclerview);
         mDataList = new ArrayList<>();
-        for (int i = 0; i < 15; i++) {
+        for (int i = 0; i < 30; i++) {
             mDataList.add("item " + i);
         }
 
@@ -66,13 +67,21 @@ public class MainActivity extends AppCompatActivity {
                 mHandler.postDelayed(mRefreshFinishRunnable, 2000);
             }
         });
+
+
+        mPtrRecyclerView.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore() {
+                mHandler.postDelayed(mRefreshFinishRunnable, 2000);
+            }
+        });
     }
 
     private class RefreshFinishRunnable implements Runnable {
 
         @Override
         public void run() {
-            Log.e(TAG, "mPtrRecyclerView.onRefreshComplete");
+            Log.e(TAG, "mPtrRecyclerView.onComplete");
             mPtrRecyclerView.onRefreshComplete();
         }
     }
