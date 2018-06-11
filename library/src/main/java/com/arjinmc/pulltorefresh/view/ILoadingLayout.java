@@ -6,5 +6,7 @@ package com.arjinmc.pulltorefresh.view;
  */
 public interface ILoadingLayout {
 
-    void onLoading();
+    void onLoadingStart();
+
+    void onLoadingEnd();
 }

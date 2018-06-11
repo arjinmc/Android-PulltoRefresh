@@ -21,29 +21,29 @@ import com.arjinmc.pulltorefresh.R;
  * Created by Eminem Lo on 2018/5/30.
  * email: arjinmc@hotmail.com
  */
-public class PullFootLayout extends PullLayout {
+public class DefaultPullFootLayout extends PullLayout {
 
     private ImageView mIvLoading;
     private TextView mTvTips;
     private ValueAnimator mRotateAnimation;
 
-    public PullFootLayout(@NonNull Context context) {
+    public DefaultPullFootLayout(@NonNull Context context) {
         super(context);
         init();
     }
 
-    public PullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public DefaultPullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public PullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public DefaultPullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public PullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public DefaultPullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
