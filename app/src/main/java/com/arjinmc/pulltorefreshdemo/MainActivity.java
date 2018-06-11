@@ -1,10 +1,11 @@
 package com.arjinmc.pulltorefreshdemo;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -12,77 +13,55 @@ import com.arjinmc.expandrecyclerview.adapter.RecyclerViewAdapter;
 import com.arjinmc.expandrecyclerview.adapter.RecyclerViewSingleTypeProcessor;
 import com.arjinmc.expandrecyclerview.adapter.RecyclerViewViewHolder;
 import com.arjinmc.expandrecyclerview.style.RecyclerViewStyleHelper;
-import com.arjinmc.pulltorefresh.PulltoRefreshRecyclerView;
-import com.arjinmc.pulltorefresh.listener.OnLoadMoreListener;
-import com.arjinmc.pulltorefresh.listener.OnRefreshListener;
 import com.arjinmc.recyclerviewdecoration.RecyclerViewItemDecoration;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final String TAG = "MainActivity";
-
-    private PulltoRefreshRecyclerView mPtrRecyclerView;
-    private List<String> mDataList;
-
-    private Handler mHandler = new Handler();
-    private RefreshFinishRunnable mRefreshFinishRunnable;
+    private RecyclerView mPtrRecyclerView;
+    private String[] titles;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mRefreshFinishRunnable = new RefreshFinishRunnable();
 
-        mPtrRecyclerView = findViewById(R.id.ptr_recyclerview);
-        mDataList = new ArrayList<>();
-        for (int i = 0; i < 30; i++) {
-            mDataList.add("item " + i);
-        }
+        mPtrRecyclerView = findViewById(R.id.recyclerview);
+        titles = getResources().getStringArray(R.array.list);
 
-        RecyclerViewStyleHelper.toLinearLayout(mPtrRecyclerView.getContentView(), LinearLayout.VERTICAL);
-        mPtrRecyclerView.getContentView().addItemDecoration(
+        RecyclerViewStyleHelper.toLinearLayout(mPtrRecyclerView, LinearLayout.VERTICAL);
+        mPtrRecyclerView.addItemDecoration(
                 new RecyclerViewItemDecoration.Builder(this)
                         .color(Color.GRAY)
                         .thickness(2)
-                        .paddingStart(10)
-                        .paddingEnd(10)
                         .create());
-        mPtrRecyclerView.getContentView().setAdapter(new RecyclerViewAdapter<>(
-                this, mDataList, R.layout.item_main, new RecyclerViewSingleTypeProcessor<String>() {
+        mPtrRecyclerView.setAdapter(new RecyclerViewAdapter<>(
+                this, Arrays.asList(titles), R.layout.item_main
+                , new RecyclerViewSingleTypeProcessor<String>() {
             @Override
-            public void onBindViewHolder(RecyclerViewViewHolder holder, int position, String data) {
+            public void onBindViewHolder(RecyclerViewViewHolder holder, final int position, String data) {
                 TextView tvText = holder.getView(R.id.tv_text);
                 tvText.setText(data);
+                holder.itemView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        switch (position) {
+                            case 0:
+                                jumpActivity(RecyclerViewDefaultActivity.class);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                });
             }
         }));
 
-        mPtrRecyclerView.setOnRefreshListener(new OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-
-                mHandler.postDelayed(mRefreshFinishRunnable, 2000);
-            }
-        });
-
-
-        mPtrRecyclerView.setOnLoadMoreListener(new OnLoadMoreListener() {
-            @Override
-            public void onLoadMore() {
-                mHandler.postDelayed(mRefreshFinishRunnable, 2000);
-            }
-        });
     }
 
-    private class RefreshFinishRunnable implements Runnable {
-
-        @Override
-        public void run() {
-            Log.e(TAG, "mPtrRecyclerView.onComplete");
-            mPtrRecyclerView.onRefreshComplete();
-        }
+    private void jumpActivity(Class clz) {
+        startActivity(new Intent(this, clz));
     }
 }

@@ -2,7 +2,6 @@ package com.arjinmc.pulltorefresh;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.IntDef;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewCompat;
@@ -40,15 +39,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     private static final int STATUS_LOAD_MORE_PULL = 3;
     private static final int STATUS_LOAD_MORE_LOADING = 4;
 
-    public static final int MODE_BOTH = 0;
-    public static final int MODE_REFRESH = 1;
-    public static final int MODE_LOAD_MORE = 2;
-
-    @IntDef({MODE_BOTH, MODE_REFRESH, MODE_LOAD_MORE})
-    @interface ModeType {
-    }
-
-    public static final int SMOOTH_REWIND_DURATION_MS = 100;
+    private static final int SMOOTH_REWIND_DURATION_MS = 100;
 
     private PullLayout mHeadView;
     private PullLayout mFootView;
@@ -58,7 +49,8 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     private T mContentView;
     private int mStatus = STATUS_STANDER;
-    private int mMode = MODE_BOTH;
+    private boolean isRefreshEnable = true;
+    private boolean isLoadMoreEnable = true;
     private int mOrientation = LinearLayout.VERTICAL;
     private int mPullHeight = 300;
 
@@ -127,6 +119,11 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     }
 
+    /**
+     * set headView
+     *
+     * @param headView
+     */
     public void setHeadView(PullHeadLayout headView) {
         if (mHeadView != null && mHeadView.getParent() != null) {
             removeView(mHeadView);
@@ -135,6 +132,11 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         updateUI();
     }
 
+    /**
+     * set footView
+     *
+     * @param footView
+     */
     public void setFootView(PullFootLayout footView) {
         if (mFootView != null && mFootView.getParent() != null) {
             removeView(mFootView);
@@ -161,35 +163,80 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         mPullHeight = height;
     }
 
+    /**
+     * set refresh function enable or not
+     *
+     * @param enable
+     */
+    public void setRefreshEnable(boolean enable) {
+        isRefreshEnable = enable;
+        updateUI();
+    }
+
+    public boolean isRefreshEnable() {
+        return isRefreshEnable;
+    }
+
+    /**
+     * set load more function enable or not
+     *
+     * @param enable
+     */
+    public void setLoadMoreEnable(boolean enable) {
+        isLoadMoreEnable = enable;
+        updateUI();
+    }
+
+    public boolean isLoadMoreEnable() {
+        return isLoadMoreEnable;
+    }
+
+    /**
+     * update ui for headView and footView
+     */
     protected final void updateUI() {
 
-        if (mHeadView != null && (mMode == MODE_REFRESH || mMode == MODE_BOTH)) {
+        if (mHeadView != null) {
             if (mHeadView.getParent() != null) {
                 removeView(mHeadView);
             }
-            addView(mHeadView, 0, new LinearLayout.LayoutParams(
-                    LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
 
-            mHeadView.measure(0, 0);
-            mHeadViewHeight = mHeadView.getMeasuredHeight();
+            if (isRefreshEnable) {
+                addView(mHeadView, 0, new LinearLayout.LayoutParams(
+                        LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+
+                mHeadView.measure(0, 0);
+                mHeadViewHeight = mHeadView.getMeasuredHeight();
+            } else {
+                mHeadViewHeight = 0;
+            }
+        } else {
+            mHeadViewHeight = 0;
         }
 
-        if (mFootView != null && (mMode == MODE_LOAD_MORE || mMode == MODE_BOTH)) {
+        if (mFootView != null) {
             if (mFootView.getParent() != null) {
                 removeView(mFootView);
             }
-            mFootView.measure(0, 0);
-            mFootViewHeight = mFootView.getMeasuredHeight();
 
-            addView(mFootView, new LinearLayout.LayoutParams(
-                    LayoutParams.MATCH_PARENT, mFootViewHeight));
+            if (isLoadMoreEnable) {
+                mFootView.measure(0, 0);
+                mFootViewHeight = mFootView.getMeasuredHeight();
+
+                addView(mFootView, new LinearLayout.LayoutParams(
+                        LayoutParams.MATCH_PARENT, mFootViewHeight));
+            } else {
+                mFootViewHeight = 0;
+            }
+        } else {
+            mFootViewHeight = 0;
         }
 
         refreshLoadingViewsSize();
     }
 
     /**
-     * hide or show loading
+     * hide or show loading view like headView and footView
      */
     protected final void refreshLoadingViewsSize() {
 
@@ -209,42 +256,63 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     }
 
-    public void resetViews() {
-        removeAllViews();
-        updateUI();
-    }
-
-    public void setMode(@ModeType int mode) {
-        mMode = mode;
-    }
-
+    /**
+     * set onRefreshListener
+     *
+     * @param onRefreshListener
+     */
     public void setOnRefreshListener(OnRefreshListener onRefreshListener) {
         mOnRefreshListener = onRefreshListener;
     }
 
+    /**
+     * set onLoadMoreListener
+     *
+     * @param onLoadMoreListener
+     */
     public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
         mOnLoadMoreListener = onLoadMoreListener;
     }
 
+    /**
+     * create content view
+     *
+     * @param context
+     * @param attrs
+     * @return
+     */
     protected abstract T createContentView(Context context, AttributeSet attrs);
 
+    /**
+     * check if it on the top/left of the pullToRefreshView
+     *
+     * @return
+     */
     protected abstract boolean isReadyToRefresh();
 
+    /**
+     * check if it on the bottom/right of the pullToRefreshView
+     *
+     * @return
+     */
     protected abstract boolean isReadyToLoadMore();
 
+    /**
+     * get content view
+     *
+     * @return
+     */
     public final T getContentView() {
         return mContentView;
     }
 
+    /**
+     * check if should show headView
+     *
+     * @return
+     */
     protected boolean shouldShowHeadView() {
         if (isReadyToRefresh() && mStatus == STATUS_REFRESH_PULL) {
-            return true;
-        }
-        return false;
-    }
-
-    protected boolean shouldShowFootView() {
-        if (isReadyToLoadMore() && mStatus == STATUS_LOAD_MORE_PULL) {
             return true;
         }
         return false;
@@ -254,20 +322,25 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * update headView
      */
     protected void updateHeadView() {
+        //if headView is not shown
         if (mStatus != STATUS_REFRESH_PULL) {
             refreshLoadingViewsSize();
         }
         scrollTo(0, (int) mMove);
         int headViewMove = (int) Math.abs(mMove);
         if (headViewMove >= mHeadViewHeight) {
+            //show release tips
             if (!mHeadViewShowReleaseTips) {
                 mHeadViewShowReleaseTips = true;
                 mHeadView.onSwitchTips(true);
             }
+            //hide release tips
         } else if (mHeadViewShowReleaseTips) {
             mHeadViewShowReleaseTips = false;
             mHeadView.onSwitchTips(false);
         }
+
+        //if need to move, pull the headView
         if (headViewMove != 0) {
             mHeadView.onPulling(mPullHeight, headViewMove);
         }
@@ -278,23 +351,22 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      */
     protected void updateFootView() {
 
-        if (mStatus != STATUS_LOAD_MORE_PULL) {
-            refreshLoadingViewsSize();
-        }
-
         scrollTo(0, (int) mMove);
         mFootView.requestLayout();
         int footViewMove = (int) Math.abs(mMove);
         if (footViewMove >= mFootViewHeight) {
+            //show release tips
             if (!mFootViewShowReleaseTips) {
                 mFootViewShowReleaseTips = true;
                 mFootView.onSwitchTips(true);
             }
+            //hide release tips
         } else if (mFootViewShowReleaseTips) {
             mFootViewShowReleaseTips = false;
             mFootView.onSwitchTips(false);
         }
 
+        //if need to move, pull the footView
         if (footViewMove != 0) {
             mFootView.onPulling(mPullHeight, footViewMove);
         }
@@ -304,7 +376,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     public boolean onTouchEvent(MotionEvent event) {
         Log.d("onTouchEvent", "status:" + mStatus);
         if (mStatus == STATUS_REFRESHING
-                || mStatus == STATUS_LOAD_MORE_LOADING) {
+                || (mStatus == STATUS_LOAD_MORE_LOADING)) {
             return true;
         }
 
@@ -373,7 +445,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         }
                         mHeadView.post(mHeadViewStartRefreshRunnable);
                     }
-                } else if (mMove == 0) {
+                } else if (mMove == 0f) {
                     mStatus = STATUS_STANDER;
                 } else {
                     if (Math.abs(mMove) < mFootViewHeight) {
@@ -391,7 +463,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 mPointDownY = 0;
                 break;
         }
-//        return super.onTouchEvent(event);
         return true;
     }
 
@@ -416,17 +487,17 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 float alter = mPointDownY - ev.getY();
                 mMove += alter;
                 mPointDownY = ev.getY();
-                if (mMove < 0 && isReadyToRefresh() && alter < 0) {
-                    if (mStatus == STATUS_STANDER && isReadyToRefresh()) {
-                        mStatus = STATUS_REFRESH_PULL;
-                        return true;
-                    }
+                if (mMove < 0 && mStatus == STATUS_STANDER && isReadyToRefresh() && alter < 0 && isRefreshEnable) {
+                    mStatus = STATUS_REFRESH_PULL;
+                    return true;
                 } else if (mMove == 0) {
                     mStatus = STATUS_STANDER;
                     return false;
-                } else if (mStatus == STATUS_STANDER && isReadyToLoadMore() && alter > 0) {
+                } else if (mMove > 0 && mStatus == STATUS_STANDER && isReadyToLoadMore() && alter > 0 && isLoadMoreEnable) {
                     mStatus = STATUS_LOAD_MORE_PULL;
                     return true;
+                } else {
+                    mMove -= alter;
                 }
                 if (mStatus == STATUS_REFRESH_PULL
                         || mStatus == STATUS_LOAD_MORE_PULL) {
@@ -437,7 +508,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 Log.d(LOG_TAG, "onInterceptTouchEvent:UP");
                 break;
         }
-//        return super.onInterceptTouchEvent(ev);
         return false;
     }
 
@@ -483,7 +553,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     }
 
     /**
-     * Rewind headView when scroll height below headView head
+     * Rewind headView when scroll height below headView top
      */
     private class HeadViewRewindRunnable implements Runnable {
 
@@ -556,7 +626,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     }
 
     /**
-     * Rewind footView when scroll height below headView head
+     * Rewind footView when scroll height below footView bottom
      */
     private class FootViewRewindRunnable implements Runnable {
 
