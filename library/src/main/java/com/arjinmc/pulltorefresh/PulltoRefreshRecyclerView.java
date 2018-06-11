@@ -7,7 +7,6 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 
 /**
@@ -48,7 +47,7 @@ public class PulltoRefreshRecyclerView extends PulltoRefreshBase<RecyclerView> {
 //        RecyclerView.LayoutManager layoutManager  = recyclerView.getLayoutManager();
 //        layoutManager.getLayoutDirection() == LinearLayoutManager
         if (!recyclerView.canScrollVertically(-1)) {
-            Log.d("isReadyToRefresh", "true");
+//            Log.d("isReadyToRefresh", "true");
             return true;
         }
         return false;
@@ -62,7 +61,7 @@ public class PulltoRefreshRecyclerView extends PulltoRefreshBase<RecyclerView> {
             if (((LinearLayoutManager) layoutManager).getOrientation() == LinearLayoutManager.VERTICAL) {
                 if (((LinearLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition()
                         == recyclerView.getAdapter().getItemCount() - 1) {
-                    Log.e("isReadyToLoadMore", "true");
+//                    Log.d("isReadyToLoadMore", "true");
                     return true;
                 }
             } else {

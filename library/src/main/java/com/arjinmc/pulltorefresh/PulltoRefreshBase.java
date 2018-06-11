@@ -416,8 +416,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 float alter = mPointDownY - ev.getY();
                 mMove += alter;
                 mPointDownY = ev.getY();
-                Log.e("mMove", mMove + "/" + alter);
-                if (mMove < 0) {
+                if (mMove < 0 && isReadyToRefresh() && alter < 0) {
                     if (mStatus == STATUS_STANDER && isReadyToRefresh()) {
                         mStatus = STATUS_REFRESH_PULL;
                         return true;
@@ -425,7 +424,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 } else if (mMove == 0) {
                     mStatus = STATUS_STANDER;
                     return false;
-                } else if (mStatus == STATUS_STANDER && isReadyToLoadMore()) {
+                } else if (mStatus == STATUS_STANDER && isReadyToLoadMore() && alter > 0) {
                     mStatus = STATUS_LOAD_MORE_PULL;
                     return true;
                 }
