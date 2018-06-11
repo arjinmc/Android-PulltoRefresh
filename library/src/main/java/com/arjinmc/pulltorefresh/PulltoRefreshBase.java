@@ -124,7 +124,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      *
      * @param headView
      */
-    public void setHeadView(PullHeadLayout headView) {
+    public void setHeadView(PullLayout headView) {
         if (mHeadView != null && mHeadView.getParent() != null) {
             removeView(mHeadView);
         }
@@ -137,7 +137,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      *
      * @param footView
      */
-    public void setFootView(PullFootLayout footView) {
+    public void setFootView(PullLayout footView) {
         if (mFootView != null && mFootView.getParent() != null) {
             removeView(mFootView);
         }

@@ -51,6 +51,9 @@ public class MainActivity extends AppCompatActivity {
                             case 0:
                                 jumpActivity(RecyclerViewDefaultActivity.class);
                                 break;
+                            case 1:
+                                jumpActivity(RecyclerViewJDActivity.class);
+                                break;
                             default:
                                 break;
                         }
