@@ -13,11 +13,7 @@ Currently works will be comming soon with:
 - [ ] ScrollView
 - [ ] WebView
 - [ ] NestScrollView
-- [ ] ListView
 - [ ] ExpandableListView
-- [ ] GridView
-- [ ] HorizontalScrollView
-- [ ] ViewPager
 
 ```code
    Copyright 2018 arjinmc
