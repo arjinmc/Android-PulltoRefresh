@@ -7,7 +7,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -21,29 +20,29 @@ import com.arjinmc.pulltorefresh.R;
  * Created by Eminem Lo on 2018/5/30.
  * email: arjinmc@hotmail.com
  */
-public class DefaultPullFootLayout extends PullLayout {
+public class DefaultVerticalPullFootLayout extends PullLayout {
 
     private ImageView mIvLoading;
     private TextView mTvTips;
     private ValueAnimator mRotateAnimation;
 
-    public DefaultPullFootLayout(@NonNull Context context) {
+    public DefaultVerticalPullFootLayout(@NonNull Context context) {
         super(context);
         init();
     }
 
-    public DefaultPullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public DefaultVerticalPullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public DefaultPullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public DefaultVerticalPullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public DefaultPullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public DefaultVerticalPullFootLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
@@ -51,8 +50,8 @@ public class DefaultPullFootLayout extends PullLayout {
     private void init() {
 
         View view = LayoutInflater.from(getContext()).inflate(R.layout.pull_to_refresh_header_vertical, null);
-        mIvLoading = view.findViewById(R.id.iv_loading);
-        mTvTips = view.findViewById(R.id.tv_tips);
+        mIvLoading = view.findViewById(R.id.pull_to_refresh_loading);
+        mTvTips = view.findViewById(R.id.pull_to_refresh_tips);
         mTvTips.setText(R.string.pull_to_refresh_pull_to_load_more);
         addView(view, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         requestLayout();

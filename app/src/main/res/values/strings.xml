@@ -4,5 +4,6 @@
     <array name="list">
         <item>RecyclerView Default Style</item>
         <item>RecyclerView JD Style</item>
+        <item>RecyclerView Horizontal Style</item>
     </array>
 </resources>

@@ -10,13 +10,13 @@
     android:paddingTop="@dimen/pull_to_refresh_header_footer_top_bottom_padding">
 
     <ImageView
-        android:id="@+id/iv_loading"
+        android:id="@+id/pull_to_refresh_loading"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/pull_to_refresh_default_ptr_rotate" />
 
     <TextView
-        android:id="@+id/tv_tips"
+        android:id="@+id/pull_to_refresh_tips"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginLeft="16dp"

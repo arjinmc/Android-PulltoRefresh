@@ -20,29 +20,29 @@ import com.arjinmc.pulltorefresh.R;
  * Created by Eminem Lo on 2018/5/30.
  * email: arjinmc@hotmail.com
  */
-public class DefaultPullHeadLayout extends PullLayout {
+public class DefaultVerticalPullHeadLayout extends PullLayout {
 
     private ImageView mIvLoading;
     private TextView mTvTips;
     private ValueAnimator mRotateAnimation;
 
-    public DefaultPullHeadLayout(@NonNull Context context) {
+    public DefaultVerticalPullHeadLayout(@NonNull Context context) {
         super(context);
         init();
     }
 
-    public DefaultPullHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public DefaultVerticalPullHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         init();
     }
 
-    public DefaultPullHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public DefaultVerticalPullHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         init();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public DefaultPullHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public DefaultVerticalPullHeadLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init();
     }
@@ -50,8 +50,8 @@ public class DefaultPullHeadLayout extends PullLayout {
     private void init() {
 
         View view = LayoutInflater.from(getContext()).inflate(R.layout.pull_to_refresh_header_vertical, null);
-        mIvLoading = view.findViewById(R.id.iv_loading);
-        mTvTips = view.findViewById(R.id.tv_tips);
+        mIvLoading = view.findViewById(R.id.pull_to_refresh_loading);
+        mTvTips = view.findViewById(R.id.pull_to_refresh_tips);
         mTvTips.setText(R.string.pull_to_refresh_pull_to_refresh);
         addView(view, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
         requestLayout();

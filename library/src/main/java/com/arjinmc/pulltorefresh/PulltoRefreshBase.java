@@ -16,8 +16,8 @@ import android.widget.LinearLayout;
 
 import com.arjinmc.pulltorefresh.listener.OnLoadMoreListener;
 import com.arjinmc.pulltorefresh.listener.OnRefreshListener;
-import com.arjinmc.pulltorefresh.view.DefaultPullFootLayout;
-import com.arjinmc.pulltorefresh.view.DefaultPullHeadLayout;
+import com.arjinmc.pulltorefresh.view.DefaultVerticalPullFootLayout;
+import com.arjinmc.pulltorefresh.view.DefaultVerticalPullHeadLayout;
 import com.arjinmc.pulltorefresh.view.ErrorLayout;
 import com.arjinmc.pulltorefresh.view.LoadingLayout;
 import com.arjinmc.pulltorefresh.view.PullLayout;
@@ -58,13 +58,18 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     private boolean isLoadMoreEnable = true;
     private int mOrientation = LinearLayout.VERTICAL;
     private int mPullHeight = 300;
+    private int mOriginalPaddingL, mOriginalPaddingT, mOriginalPaddingR, mOriginalPaddingB;
+    /**
+     * mark for is first init
+     */
+    private boolean isFirstInit;
 
     private int mHeadViewHeight;
     private int mFootViewHeight;
     private boolean mHeadViewShowReleaseTips;
     private boolean mFootViewShowReleaseTips;
 
-    private float mPointDownY;
+    private float mPointDown;
     private float mMove;
 
     // Runnable for headView to rewind for pulling to refresh
@@ -108,8 +113,8 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         addContentView(context, mContentView);
 
         //init head and foot
-        mHeadView = new DefaultPullHeadLayout(context, attrs);
-        mFootView = new DefaultPullFootLayout(context, attrs);
+        mHeadView = new DefaultVerticalPullHeadLayout(context, attrs);
+        mFootView = new DefaultVerticalPullFootLayout(context, attrs);
         updateUI();
     }
 
@@ -234,11 +239,18 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             }
 
             if (isRefreshEnable) {
-                addView(mHeadView, 0, new LinearLayout.LayoutParams(
-                        LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+                if (getOrientation() == VERTICAL) {
+                    addView(mHeadView, 0, new LinearLayout.LayoutParams(
+                            LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
+                    mHeadView.measure(0, 0);
+                    mHeadViewHeight = mHeadView.getMeasuredHeight();
+                } else {
+                    addView(mHeadView, 0, new LinearLayout.LayoutParams(
+                            LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
+                    mHeadView.measure(0, 0);
+                    mHeadViewHeight = mHeadView.getMeasuredWidth();
+                }
 
-                mHeadView.measure(0, 0);
-                mHeadViewHeight = mHeadView.getMeasuredHeight();
             } else {
                 mHeadViewHeight = 0;
             }
@@ -252,11 +264,20 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             }
 
             if (isLoadMoreEnable) {
-                mFootView.measure(0, 0);
-                mFootViewHeight = mFootView.getMeasuredHeight();
 
-                addView(mFootView, new LinearLayout.LayoutParams(
-                        LayoutParams.MATCH_PARENT, mFootViewHeight));
+                if (getOrientation() == VERTICAL) {
+                    mFootView.measure(0, 0);
+                    mFootViewHeight = mFootView.getMeasuredHeight();
+
+                    addView(mFootView, new LinearLayout.LayoutParams(
+                            LayoutParams.MATCH_PARENT, mFootViewHeight));
+                } else {
+                    mFootView.measure(0, 0);
+                    mFootViewHeight = mFootView.getMeasuredWidth();
+
+                    addView(mFootView, new LinearLayout.LayoutParams(mFootViewHeight
+                            , LayoutParams.MATCH_PARENT));
+                }
             } else {
                 mFootViewHeight = 0;
             }
@@ -272,16 +293,31 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      */
     protected final void refreshLoadingViewsSize() {
 
-        int paddingL = getPaddingLeft();
-        int paddingR = getPaddingRight();
+        if (!isFirstInit) {
+            mOriginalPaddingL = getPaddingLeft();
+            mOriginalPaddingR = getPaddingRight();
+            mOriginalPaddingT = getPaddingTop();
+            mOriginalPaddingB = getPaddingBottom();
+            isFirstInit = true;
+        }
+        int paddingL = mOriginalPaddingL;
+        int paddingR = mOriginalPaddingR;
 
-        int paddingT = getPaddingTop();
-        int paddingB = getPaddingBottom();
+        int paddingT = mOriginalPaddingT;
+        int paddingB = mOriginalPaddingB;
 
-        if (shouldShowHeadView()) {
-            paddingT = 0;
+        if (getOrientation() == VERTICAL) {
+            if (shouldShowHeadView()) {
+                paddingT = 0;
+            } else {
+                paddingT = -mHeadViewHeight;
+            }
         } else {
-            paddingT = -mHeadViewHeight;
+            if (shouldShowHeadView()) {
+                paddingL = 0;
+            } else {
+                paddingL = -mHeadViewHeight;
+            }
         }
 
         setPadding(paddingL, paddingT, paddingR, paddingB);
@@ -330,6 +366,13 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     protected abstract boolean isReadyToLoadMore();
 
     /**
+     * get the orientation of Content View (return with orientation of LinearLayout
+     *
+     * @return
+     */
+    protected abstract int getContentViewOrientation();
+
+    /**
      * get content view
      *
      * @return
@@ -358,7 +401,12 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         if (mStatus != STATUS_REFRESH_PULL) {
             refreshLoadingViewsSize();
         }
-        scrollTo(0, (int) mMove);
+
+        if (getOrientation() == VERTICAL) {
+            scrollTo(0, (int) mMove);
+        } else {
+            scrollTo((int) mMove, 0);
+        }
         int headViewMove = (int) Math.abs(mMove);
         if (headViewMove >= mHeadViewHeight) {
             //show release tips
@@ -372,10 +420,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             mHeadView.onSwitchTips(false);
         }
 
-        //if need to move, pull the headView
-        if (headViewMove != 0) {
-            mHeadView.onPulling(mPullHeight, headViewMove);
-        }
+        mHeadView.onPulling(mPullHeight, headViewMove);
     }
 
     /**
@@ -383,7 +428,11 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      */
     protected void updateFootView() {
 
-        scrollTo(0, (int) mMove);
+        if (getOrientation() == VERTICAL) {
+            scrollTo(0, (int) mMove);
+        } else {
+            scrollTo((int) mMove, 0);
+        }
         mFootView.requestLayout();
         int footViewMove = (int) Math.abs(mMove);
         if (footViewMove >= mFootViewHeight) {
@@ -398,10 +447,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             mFootView.onSwitchTips(false);
         }
 
-        //if need to move, pull the footView
-        if (footViewMove != 0) {
-            mFootView.onPulling(mPullHeight, footViewMove);
-        }
+        mFootView.onPulling(mPullHeight, footViewMove);
     }
 
     @Override
@@ -416,7 +462,11 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             case MotionEvent.ACTION_DOWN:
                 Log.d(LOG_TAG, "onTouchEvent:DOWN");
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
-                    mPointDownY = event.getY();
+                    if (getOrientation() == VERTICAL) {
+                        mPointDown = event.getY();
+                    } else {
+                        mPointDown = event.getX();
+                    }
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -425,9 +475,18 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         || mStatus == STATUS_LOAD_MORE_PULL)) {
                     return false;
                 }
-                float alter = mPointDownY - event.getY();
+                float alter = 0;
+                if (getOrientation() == VERTICAL) {
+                    alter = mPointDown - event.getY();
+                } else {
+                    alter = mPointDown - event.getX();
+                }
                 mMove += alter;
-                mPointDownY = event.getY();
+                if (getOrientation() == VERTICAL) {
+                    mPointDown = event.getY();
+                } else {
+                    mPointDown = event.getX();
+                }
                 if (mMove < 0) {
                     if (mStatus == STATUS_REFRESH_PULL) {
                         //control for the border
@@ -492,7 +551,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         mFootView.post(mFootViewStartRefreshRunnable);
                     }
                 }
-                mPointDownY = 0;
+                mPointDown = 0;
                 break;
         }
         return true;
@@ -511,14 +570,27 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             case MotionEvent.ACTION_DOWN:
                 Log.d(LOG_TAG, "onInterceptTouchEvent:DOWN");
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
-                    mPointDownY = ev.getY();
+                    if (getOrientation() == VERTICAL) {
+                        mPointDown = ev.getY();
+                    } else {
+                        mPointDown = ev.getX();
+                    }
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
                 Log.d(LOG_TAG, "onInterceptTouchEvent:MOVE");
-                float alter = mPointDownY - ev.getY();
+                float alter = 0;
+                if (getOrientation() == VERTICAL) {
+                    alter = mPointDown - ev.getY();
+                } else {
+                    alter = mPointDown - ev.getX();
+                }
                 mMove += alter;
-                mPointDownY = ev.getY();
+                if (getOrientation() == VERTICAL) {
+                    mPointDown = ev.getY();
+                } else {
+                    mPointDown = ev.getX();
+                }
                 if (mMove < 0 && mStatus == STATUS_STANDER && isReadyToRefresh() && alter < 0 && isRefreshEnable) {
                     mStatus = STATUS_REFRESH_PULL;
                     return true;
@@ -565,6 +637,12 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 requestLayout();
             }
         });
+    }
+
+    @Override
+    public void setOrientation(int orientation) {
+        super.setOrientation(orientation);
+        updateUI();
     }
 
     /**
