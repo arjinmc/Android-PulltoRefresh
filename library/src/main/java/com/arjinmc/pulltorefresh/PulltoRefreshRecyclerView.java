@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 
 /**
+ * PulltoRefreshRecyclerView
  * Created by Eminem Lo on 2018/6/4.
  * email: arjinmc@hotmail.com
  */
@@ -49,6 +50,7 @@ public class PulltoRefreshRecyclerView extends PulltoRefreshBase<RecyclerView> {
         if (getContentViewOrientation() == -1) {
             return false;
         }
+
         if (getOrientation() != getContentViewOrientation()) {
             try {
                 throw new IllegalAccessException("The orientation of PulltoRefreshView must be the same as RecyclerView");
@@ -62,20 +64,26 @@ public class PulltoRefreshRecyclerView extends PulltoRefreshBase<RecyclerView> {
         if (recyclerView == null) {
             return false;
         }
+
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
         if (layoutManager instanceof LinearLayoutManager) {
-            if (layoutManager.getLayoutDirection() == LinearLayoutManager.VERTICAL) {
-                if (!recyclerView.canScrollVertically(-1)) {
-                    return true;
-                }
-            } else if (((LinearLayoutManager) layoutManager)
+            if (((LinearLayoutManager) layoutManager)
                     .findFirstCompletelyVisibleItemPosition() == 0) {
-//                Log.d("isReadyToRefresh", "true");
                 return true;
             }
         } else if (layoutManager instanceof GridLayoutManager) {
+            if (((GridLayoutManager) layoutManager).findFirstCompletelyVisibleItemPosition() == 0) {
+                return true;
+            }
 
         } else if (layoutManager instanceof StaggeredGridLayoutManager) {
+
+            int[] complete = ((StaggeredGridLayoutManager) layoutManager)
+                    .findFirstCompletelyVisibleItemPositions(
+                            new int[((StaggeredGridLayoutManager) layoutManager).getSpanCount()]);
+            if (complete[0] == 0) {
+                return true;
+            }
 
         }
         return false;
@@ -87,6 +95,7 @@ public class PulltoRefreshRecyclerView extends PulltoRefreshBase<RecyclerView> {
         if (getContentViewOrientation() == -1) {
             return false;
         }
+
         if (getOrientation() != getContentViewOrientation()) {
             try {
                 throw new IllegalAccessException("The orientation of PulltoRefreshView must be the same as RecyclerView");
@@ -100,18 +109,32 @@ public class PulltoRefreshRecyclerView extends PulltoRefreshBase<RecyclerView> {
         if (recyclerView == null) {
             return false;
         }
+
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
         if (layoutManager instanceof LinearLayoutManager) {
             if (((LinearLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition()
                     == recyclerView.getAdapter().getItemCount() - 1) {
-//                Log.d("isReadyToLoadMore", "true");
                 return true;
             }
 
         } else if (layoutManager instanceof GridLayoutManager) {
 
+            if (((GridLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition()
+                    == recyclerView.getAdapter().getItemCount() - 1) {
+                return true;
+            }
+
         } else if (layoutManager instanceof StaggeredGridLayoutManager) {
 
+            int spanCount = ((StaggeredGridLayoutManager) layoutManager).getSpanCount();
+            int[] complete = ((StaggeredGridLayoutManager) layoutManager)
+                    .findLastCompletelyVisibleItemPositions(new int[spanCount]);
+
+            int sum = complete[0] + complete[1] + complete[2];
+            if (sum != -3 && (complete[spanCount - 1] == -1
+                    || complete[spanCount - 1] == recyclerView.getAdapter().getItemCount() - 1)) {
+                return true;
+            }
         }
         return false;
     }
