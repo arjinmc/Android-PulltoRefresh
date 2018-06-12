@@ -16,11 +16,11 @@ import android.widget.LinearLayout;
 
 import com.arjinmc.pulltorefresh.listener.OnLoadMoreListener;
 import com.arjinmc.pulltorefresh.listener.OnRefreshListener;
-import com.arjinmc.pulltorefresh.view.LoadingLayout;
 import com.arjinmc.pulltorefresh.view.DefaultPullFootLayout;
 import com.arjinmc.pulltorefresh.view.DefaultPullHeadLayout;
+import com.arjinmc.pulltorefresh.view.ErrorLayout;
+import com.arjinmc.pulltorefresh.view.LoadingLayout;
 import com.arjinmc.pulltorefresh.view.PullLayout;
-import com.arjinmc.pulltorefresh.view.RetryLayout;
 
 import static com.arjinmc.pulltorefresh.BuildConfig.DEBUG;
 
@@ -39,6 +39,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     private static final int STATUS_REFRESHING = 2;
     private static final int STATUS_LOAD_MORE_PULL = 3;
     private static final int STATUS_LOAD_MORE_LOADING = 4;
+    private static final int STATUS_LOADING = 5;
+    private static final int STATUS_EMPTY = 6;
+    private static final int STATUS_ERROR = 7;
 
     private static final int SMOOTH_REWIND_DURATION_MS = 100;
 
@@ -46,7 +49,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     private PullLayout mFootView;
     private LoadingLayout mLoadingView;
     private View mEmptyView;
-    private RetryLayout mRetryView;
+    private ErrorLayout mErrorView;
     private FrameLayout mContentWrapper;
 
     private T mContentView;
@@ -156,7 +159,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         if (height <= 0 && (mPullHeight > mHeadViewHeight + 20 || mPullHeight > mFootViewHeight + 20)) {
             try {
                 throw new IllegalAccessException(
-                        "Pull height must be above zero and bigger than headViewHeight/footViewHeight");
+                        "Pull height must be above zero and bigger 20 than headViewHeight/footViewHeight");
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
                 return;
@@ -191,6 +194,33 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     public boolean isLoadMoreEnable() {
         return isLoadMoreEnable;
+    }
+
+    /**
+     * set loading view
+     *
+     * @param loadingView
+     */
+    public void setLoadingView(LoadingLayout loadingView) {
+        mLoadingView = loadingView;
+    }
+
+    /**
+     * set empty
+     *
+     * @param emptyView
+     */
+    public void setEmptyView(View emptyView) {
+        mEmptyView = emptyView;
+    }
+
+    /**
+     * set retryView
+     *
+     * @param errorView
+     */
+    public void setErrorView(ErrorLayout errorView) {
+        mErrorView = errorView;
     }
 
     /**

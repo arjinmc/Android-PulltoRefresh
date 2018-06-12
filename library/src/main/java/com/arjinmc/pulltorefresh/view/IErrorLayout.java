@@ -1,11 +1,11 @@
 package com.arjinmc.pulltorefresh.view;
 
 /**
- * IRetryLayout
+ * IErrorLayout
  * Created by Eminem Lo on 2018/6/1.
  * email: arjinmc@hotmail.com
  */
-public interface IRetryLayout {
+public interface IErrorLayout {
 
     void onRetry();
 }

@@ -12,22 +12,22 @@ import android.widget.FrameLayout;
  * Created by Eminem Lo on 2018/6/1.
  * email: arjinmc@hotmail.com
  */
-public abstract class RetryLayout extends FrameLayout implements IRetryLayout {
+public abstract class ErrorLayout extends FrameLayout implements IErrorLayout {
 
-    public RetryLayout(@NonNull Context context) {
+    public ErrorLayout(@NonNull Context context) {
         super(context);
     }
 
-    public RetryLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public ErrorLayout(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public RetryLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    public ErrorLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public RetryLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public ErrorLayout(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 }
