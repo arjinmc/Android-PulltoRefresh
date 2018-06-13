@@ -130,8 +130,11 @@ public class PulltoRefreshRecyclerView extends PulltoRefreshBase<RecyclerView> {
             int[] complete = ((StaggeredGridLayoutManager) layoutManager)
                     .findLastCompletelyVisibleItemPositions(new int[spanCount]);
 
-            int sum = complete[0] + complete[1] + complete[2];
-            if (sum != -3 && (complete[spanCount - 1] == -1
+            int sum = 0;
+            for (int i = 0; i < spanCount; i++) {
+                sum += complete[i];
+            }
+            if (sum != -spanCount && (complete[spanCount - 1] == -1
                     || complete[spanCount - 1] == recyclerView.getAdapter().getItemCount() - 1)) {
                 return true;
             }
