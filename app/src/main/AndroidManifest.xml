@@ -20,6 +20,7 @@
         <activity android:name=".RecyclerViewJDActivity" />
         <activity android:name=".RecyclerViewHorizontalActivity"/>
         <activity android:name=".StatusModeActivity"/>
+        <activity android:name=".CustomPulltoRefreshActivity"/>
     </application>
 
 </manifest>

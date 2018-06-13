@@ -60,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
                             case 3:
                                 jumpActivity(StatusModeActivity.class);
                                 break;
+                            case 4:
+                                jumpActivity(CustomPulltoRefreshActivity.class);
+
                             default:
                                 break;
                         }
