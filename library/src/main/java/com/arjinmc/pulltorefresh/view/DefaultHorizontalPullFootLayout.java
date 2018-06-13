@@ -52,7 +52,7 @@ public class DefaultHorizontalPullFootLayout extends PullLayout {
         mPbLoading = view.findViewById(R.id.pull_to_refresh_progress);
         mIvArrow.setRotation(90);
         addView(view, new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.MATCH_PARENT));
-        requestLayout();
+
         view.measure(0, 0);
         mHeight = view.getMeasuredWidth();
     }

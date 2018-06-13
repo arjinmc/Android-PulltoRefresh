@@ -18,7 +18,6 @@ import com.arjinmc.pulltorefresh.listener.OnLoadMoreListener;
 import com.arjinmc.pulltorefresh.listener.OnRefreshListener;
 import com.arjinmc.pulltorefresh.view.DefaultVerticalPullFootLayout;
 import com.arjinmc.pulltorefresh.view.DefaultVerticalPullHeadLayout;
-import com.arjinmc.pulltorefresh.view.ErrorLayout;
 import com.arjinmc.pulltorefresh.view.LoadingLayout;
 import com.arjinmc.pulltorefresh.view.PullLayout;
 
@@ -49,7 +48,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     private PullLayout mFootView;
     private LoadingLayout mLoadingView;
     private View mEmptyView;
-    private ErrorLayout mErrorView;
+    private View mErrorView;
     private FrameLayout mContentWrapper;
 
     private T mContentView;
@@ -207,7 +206,11 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * @param loadingView
      */
     public void setLoadingView(LoadingLayout loadingView) {
+        if (mLoadingView != null) {
+            mContentWrapper.removeView(mLoadingView);
+        }
         mLoadingView = loadingView;
+        addStatusView(loadingView);
     }
 
     /**
@@ -216,7 +219,11 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * @param emptyView
      */
     public void setEmptyView(View emptyView) {
+        if (mEmptyView != null) {
+            mContentWrapper.removeView(mEmptyView);
+        }
         mEmptyView = emptyView;
+        addStatusView(emptyView);
     }
 
     /**
@@ -224,8 +231,118 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      *
      * @param errorView
      */
-    public void setErrorView(ErrorLayout errorView) {
+    public void setErrorView(View errorView) {
+        if (mErrorView != null) {
+            mContentWrapper.removeView(mErrorView);
+        }
         mErrorView = errorView;
+        addStatusView(errorView);
+    }
+
+    /**
+     * add status view for content wrapper
+     *
+     * @param view
+     */
+    private final void addStatusView(View view) {
+
+        mContentWrapper.addView(view, new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        view.setVisibility(View.GONE);
+    }
+
+    /**
+     * show statusView in content wrapper
+     *
+     * @param view
+     */
+    private final void showStatusView(View view) {
+        if (view != null) {
+            view.setVisibility(View.VISIBLE);
+        }
+    }
+
+    /**
+     * hide statusView in content wrapper
+     *
+     * @param view
+     */
+    private final void hideStatusView(View view) {
+        if (view != null) {
+            view.setVisibility(View.GONE);
+        }
+    }
+
+    /**
+     * show loading status view
+     */
+    public final void toLoading() {
+        if (mStatus == STATUS_LOADING) {
+            return;
+        }
+        showStatusView(mLoadingView);
+        hideStatusView(mEmptyView);
+        hideStatusView(mErrorView);
+        hideStatusView(mContentView);
+        mStatus = STATUS_LOADING;
+
+        if (mLoadingView != null) {
+            mLoadingView.onLoadingStart();
+        }
+    }
+
+    /**
+     * show empty status view
+     */
+    public final void toEmpty() {
+        if (mStatus == STATUS_EMPTY) {
+            return;
+        }
+        showStatusView(mEmptyView);
+        hideStatusView(mLoadingView);
+        hideStatusView(mErrorView);
+        hideStatusView(mContentView);
+        mStatus = STATUS_EMPTY;
+
+        if (mLoadingView != null) {
+            mLoadingView.onLoadingEnd();
+        }
+    }
+
+    /**
+     * show empty status view
+     */
+    public final void toError() {
+        if (mStatus == STATUS_ERROR) {
+            return;
+        }
+        showStatusView(mErrorView);
+        hideStatusView(mLoadingView);
+        hideStatusView(mEmptyView);
+        hideStatusView(mContentView);
+        mStatus = STATUS_ERROR;
+
+        if (mLoadingView != null) {
+            mLoadingView.onLoadingEnd();
+        }
+    }
+
+    /**
+     * show content view / standard status
+     */
+    public final void toContent() {
+        if (mStatus == STATUS_STANDER) {
+            return;
+        }
+        showStatusView(mContentView);
+        hideStatusView(mLoadingView);
+        hideStatusView(mEmptyView);
+        hideStatusView(mErrorView);
+        mStatus = STATUS_STANDER;
+
+        if (mLoadingView != null) {
+            mLoadingView.onLoadingEnd();
+        }
     }
 
     /**
@@ -591,13 +708,15 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 } else {
                     mPointDown = ev.getX();
                 }
-                if (mMove < 0 && mStatus == STATUS_STANDER && isReadyToRefresh() && alter < 0 && isRefreshEnable) {
+                if (mMove < 0 && mStatus == STATUS_STANDER
+                        && isReadyToRefresh() && alter < 0 && isRefreshEnable) {
                     mStatus = STATUS_REFRESH_PULL;
                     return true;
                 } else if (mMove == 0) {
                     mStatus = STATUS_STANDER;
                     return false;
-                } else if (mMove > 0 && mStatus == STATUS_STANDER && isReadyToLoadMore() && alter > 0 && isLoadMoreEnable) {
+                } else if (mMove > 0 && mStatus == STATUS_STANDER
+                        && isReadyToLoadMore() && alter > 0 && isLoadMoreEnable) {
                     mStatus = STATUS_LOAD_MORE_PULL;
                     return true;
                 } else {

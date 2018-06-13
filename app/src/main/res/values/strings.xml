@@ -5,5 +5,9 @@
         <item>RecyclerView Default Style</item>
         <item>RecyclerView JD Style</item>
         <item>RecyclerView Horizontal Style</item>
+        <item>Status mode</item>
     </array>
+
+    <string name="pull_to_refresh_error">Oops, it is a error. Try again.</string>
+    <string name="pull_to_refresh_try">Try</string>
 </resources>

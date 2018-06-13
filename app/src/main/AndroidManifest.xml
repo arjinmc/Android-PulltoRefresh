@@ -19,6 +19,7 @@
         <activity android:name=".RecyclerViewDefaultActivity" />
         <activity android:name=".RecyclerViewJDActivity" />
         <activity android:name=".RecyclerViewHorizontalActivity"/>
+        <activity android:name=".StatusModeActivity"/>
     </application>
 
 </manifest>

@@ -54,7 +54,6 @@ public class DefaultVerticalPullFootLayout extends PullLayout {
         mTvTips = view.findViewById(R.id.pull_to_refresh_tips);
         mTvTips.setText(R.string.pull_to_refresh_pull_to_load_more);
         addView(view, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        requestLayout();
     }
 
     @Override
