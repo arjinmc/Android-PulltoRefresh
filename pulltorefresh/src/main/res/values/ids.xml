@@ -2,4 +2,6 @@
 <resources>
     <item type="id" name="pull_to_refresh_recyclerview"/>
     <item type="id" name="pull_to_refresh_scrollview"/>
+    <item type="id" name="pull_to_refresh_horizontal_scrollview"/>
+    <item type="id" name="pull_to_refresh_nested_scrollview"/>
 </resources>

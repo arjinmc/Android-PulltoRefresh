@@ -11,6 +11,7 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
 /**
+ * PulltoRefreshScrollView
  * Created by Eminem Lo on 2018/6/4.
  * email: arjinmc@hotmail.com
  */

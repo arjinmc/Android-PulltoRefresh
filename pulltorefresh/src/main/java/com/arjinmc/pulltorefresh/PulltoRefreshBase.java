@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
+import android.widget.HorizontalScrollView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 
@@ -742,7 +743,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         if (contentView instanceof RecyclerView && getChildCount() >= 3) {
             throw new UnsupportedOperationException("PulltoRefreshRecyclerView cannot add child in XML!");
-        } else if (contentView instanceof ScrollView) {
+        } else if (contentView instanceof ScrollView || contentView instanceof HorizontalScrollView) {
             if (getChildCount() < 3) {
                 super.addView(child, index, params);
             } else if (getChildCount() == 3) {
