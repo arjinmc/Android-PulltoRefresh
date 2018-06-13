@@ -62,7 +62,10 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                             case 4:
                                 jumpActivity(CustomPulltoRefreshActivity.class);
-
+                                break;
+                            case 5:
+                                jumpActivity(ScrollViewActivity.class);
+                                break;
                             default:
                                 break;
                         }

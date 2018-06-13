@@ -21,6 +21,7 @@
         <activity android:name=".RecyclerViewHorizontalActivity"/>
         <activity android:name=".StatusModeActivity"/>
         <activity android:name=".CustomPulltoRefreshActivity"/>
+        <activity android:name=".ScrollViewActivity"/>
     </application>
 
 </manifest>

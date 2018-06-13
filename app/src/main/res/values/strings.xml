@@ -7,6 +7,7 @@
         <item>RecyclerView Horizontal Style</item>
         <item>Status mode</item>
         <item>Custom PulltoRefresh</item>
+        <item>ScrollView</item>
     </array>
 
     <string name="pull_to_refresh_error">Oops, it is a error. Try again.</string>

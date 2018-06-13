@@ -5,14 +5,17 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewCompat;
+import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import com.arjinmc.pulltorefresh.listener.OnLoadMoreListener;
 import com.arjinmc.pulltorefresh.listener.OnRefreshListener;
@@ -20,8 +23,6 @@ import com.arjinmc.pulltorefresh.view.DefaultVerticalPullFootLayout;
 import com.arjinmc.pulltorefresh.view.DefaultVerticalPullHeadLayout;
 import com.arjinmc.pulltorefresh.view.LoadingLayout;
 import com.arjinmc.pulltorefresh.view.PullLayout;
-
-import static com.arjinmc.pulltorefresh.BuildConfig.DEBUG;
 
 /**
  * PulltoRefreshView
@@ -735,11 +736,27 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     }
 
     @Override
-    protected final void onSizeChanged(int w, int h, int oldw, int oldh) {
-        if (DEBUG) {
-            Log.d(LOG_TAG, String.format("onSizeChanged. W: %d, H: %d", w, h));
-        }
+    public void addView(View child, int index, ViewGroup.LayoutParams params) {
 
+        final T contentView = getContentView();
+
+        if (contentView instanceof RecyclerView && getChildCount() >= 3) {
+            throw new UnsupportedOperationException("PulltoRefreshRecyclerView cannot add child in XML!");
+        } else if (contentView instanceof ScrollView) {
+            if (getChildCount() < 3) {
+                super.addView(child, index, params);
+            } else if (getChildCount() == 3) {
+                ((ViewGroup) contentView).addView(child, 0, params);
+            } else {
+                throw new UnsupportedOperationException("PulltoRefreshScrollView should have only one child!");
+            }
+        } else {
+            super.addView(child, index, params);
+        }
+    }
+
+    @Override
+    protected final void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
         refreshLoadingViewsSize();
