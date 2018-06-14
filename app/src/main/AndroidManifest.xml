@@ -23,6 +23,7 @@
         <activity android:name=".CustomPulltoRefreshActivity"/>
         <activity android:name=".ScrollViewActivity"/>
         <activity android:name=".HorizontalScrollViewActivity"/>
+        <activity android:name=".NestedScrollViewActivity"/>
     </application>
 
 </manifest>

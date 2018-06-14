@@ -9,6 +9,7 @@
         <item>Custom PulltoRefresh</item>
         <item>ScrollView</item>
         <item>HorizontalScrollView</item>
+        <item>NestedScrollView</item>
     </array>
 
     <string name="pull_to_refresh_error">Oops, it is a error. Try again.</string>

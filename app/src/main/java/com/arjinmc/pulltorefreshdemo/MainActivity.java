@@ -69,6 +69,9 @@ public class MainActivity extends AppCompatActivity {
                             case 6:
                                 jumpActivity(HorizontalScrollViewActivity.class);
                                 break;
+                            case 7:
+                                jumpActivity(NestedScrollViewActivity.class);
+                                break;
                             default:
                                 break;
                         }

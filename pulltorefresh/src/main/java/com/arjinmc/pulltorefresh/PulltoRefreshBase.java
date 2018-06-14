@@ -5,9 +5,10 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -571,7 +572,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.d("onTouchEvent", "status:" + mStatus);
         if (mStatus == STATUS_REFRESHING
                 || (mStatus == STATUS_LOAD_MORE_LOADING)) {
             return true;
@@ -579,7 +579,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.d(LOG_TAG, "onTouchEvent:DOWN");
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
                     if (getOrientation() == VERTICAL) {
                         mPointDown = event.getY();
@@ -589,7 +588,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.d(LOG_TAG, "onTouchEvent:MOVE");
                 if (!(mStatus == STATUS_REFRESH_PULL
                         || mStatus == STATUS_LOAD_MORE_PULL)) {
                     return false;
@@ -642,7 +640,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
                 break;
             case MotionEvent.ACTION_UP:
-                Log.d(LOG_TAG, "onTouchEvent:UP");
                 if (mMove < 0) {
                     if (Math.abs(mMove) < mHeadViewHeight) {
                         if (mHeadViewRewindRunnable == null) {
@@ -672,13 +669,14 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 }
                 mPointDown = 0;
                 break;
+            default:
+                break;
         }
         return true;
     }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        Log.d("onInterceptTouchEvent", "status:" + mStatus);
 
         if (mStatus == STATUS_REFRESHING
                 || mStatus == STATUS_LOAD_MORE_LOADING) {
@@ -687,7 +685,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.d(LOG_TAG, "onInterceptTouchEvent:DOWN");
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
                     if (getOrientation() == VERTICAL) {
                         mPointDown = ev.getY();
@@ -697,7 +694,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.d(LOG_TAG, "onInterceptTouchEvent:MOVE");
                 float alter = 0;
                 if (getOrientation() == VERTICAL) {
                     alter = mPointDown - ev.getY();
@@ -729,8 +725,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                     return true;
                 }
                 break;
-            case MotionEvent.ACTION_UP:
-                Log.d(LOG_TAG, "onInterceptTouchEvent:UP");
+            default:
                 break;
         }
         return false;
@@ -743,7 +738,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         if (contentView instanceof RecyclerView && getChildCount() >= 3) {
             throw new UnsupportedOperationException("PulltoRefreshRecyclerView cannot add child in XML!");
-        } else if (contentView instanceof ScrollView || contentView instanceof HorizontalScrollView) {
+        } else if (contentView instanceof ScrollView
+                || contentView instanceof HorizontalScrollView
+                || contentView instanceof NestedScrollView) {
             if (getChildCount() < 3) {
                 super.addView(child, index, params);
             } else if (getChildCount() == 3) {

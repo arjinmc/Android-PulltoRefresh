@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.widget.NestedScrollView;
 import android.util.AttributeSet;
+import android.view.View;
 import android.widget.LinearLayout;
 
 /**
@@ -45,7 +46,7 @@ public class PulltoRefreshNestedScrollView extends PulltoRefreshBase<NestedScrol
         if (nestedScrollView == null) {
             return false;
         }
-        return false;
+        return nestedScrollView.getScrollY() == 0;
     }
 
     @Override
@@ -53,6 +54,10 @@ public class PulltoRefreshNestedScrollView extends PulltoRefreshBase<NestedScrol
         NestedScrollView nestedScrollView = getContentView();
         if (nestedScrollView == null) {
             return false;
+        }
+        View scrollViewChild = nestedScrollView.getChildAt(0);
+        if (null != scrollViewChild) {
+            return nestedScrollView.getScrollY() >= (scrollViewChild.getHeight() - getHeight());
         }
         return false;
     }
