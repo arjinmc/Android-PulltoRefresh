@@ -3,18 +3,35 @@ PulltoRefreshView for Android
 
 Reference to [Android-PullToRefresh](https://github.com/chrisbanes/Android-PullToRefresh) by Chris Banes
 
+## Import
+
+This repo has been added to JCenter.
+##### maven
+
+```code
+<dependency>
+  <groupId>com.arjinmc.android</groupId>
+  <artifactId>pulltorefresh</artifactId>
+  <version>1.0</version>
+  <type>pom</type>
+</dependency>
+```
+
+##### gradle
+
+```code
+compile 'com.arjinmc.android:pulltorefresh:1.0'
+```
+
 ## Features
 Supports both Pulling Down from the top, and Pulling Up from the bottom (or even both).
-Animated Scrolling for all devices.
-Over Scroll supports for devices on Android v2.3+.
-Currently works will be comming soon with:
 
-- [ ] RecyclerView
-- [ ] ScrollView
-- [ ] WebView
-- [ ] NestScrollView
-- [ ] ExpandableListView
+- [x] RecyclerView
+- [x] ScrollView
+- [x] HorizontalScrollView
+- [x] NestScrollView
 
+![image](https://github.com/arjinmc/Android-PulltoRefresh/blob/master/images/sample.gif)
 ```code
    Copyright 2018 arjinmc
 
