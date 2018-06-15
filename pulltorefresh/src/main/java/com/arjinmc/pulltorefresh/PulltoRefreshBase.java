@@ -8,7 +8,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -630,7 +629,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.d("onTouchEvent", mStatus + "");
         if (mStatus == STATUS_REFRESHING
                 || (mStatus == STATUS_LOAD_MORE_LOADING)) {
             return true;
@@ -638,7 +636,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.d("onTouchEvent", "ACTION_DOWN");
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
                     if (getOrientation() == VERTICAL) {
                         mPointDown = event.getY();
@@ -648,7 +645,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.d("onTouchEvent", "ACTION_MOVE");
                 if (!(mStatus == STATUS_REFRESH_PULL
                         || mStatus == STATUS_LOAD_MORE_PULL)) {
                     return false;
@@ -698,7 +694,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
                 break;
             case MotionEvent.ACTION_UP:
-                Log.d("onTouchEvent", "ACTION_UP");
                 if (mMove < 0) {
                     if (Math.abs(mMove) < mHeadViewHeight) {
                         if (mHeadViewRewindRunnable == null) {
@@ -735,8 +730,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 
-        Log.d("onInterceptTouchEvent", mStatus + "");
-
         if (mStatus == STATUS_REFRESHING
                 || mStatus == STATUS_LOAD_MORE_LOADING) {
             return true;
@@ -744,7 +737,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.d("onInterceptTouchEvent", "ACTION_DOWN");
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
                     if (getOrientation() == VERTICAL) {
                         mPointDown = ev.getY();
@@ -754,7 +746,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.d("onInterceptTouchEvent", "ACTION_DOWN");
                 float alter = 0;
                 if (getOrientation() == VERTICAL) {
                     alter = mPointDown - ev.getY();
@@ -902,6 +893,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 interpolator = new DecelerateInterpolator();
             }
 
+            if (mStatus == STATUS_REFRESH_PULL) {
+                mStatus = STATUS_REFRESHING;
+            }
+
             if (!(mMove >= 0)) {
                 float deltaY = (Math.abs(mMove) - mHeadViewHeight)
                         * interpolator.getInterpolation(SMOOTH_REWIND_DURATION_MS / 1000f);
@@ -916,12 +911,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             if (mMove != -mHeadViewHeight) {
                 ViewCompat.postOnAnimation(mHeadView, this);
             } else {
-                if (mStatus == STATUS_REFRESH_PULL) {
-                    mStatus = STATUS_REFRESHING;
-                    mHeadView.onLoading();
-                    if (mOnRefreshListener != null) {
-                        mOnRefreshListener.onRefresh();
-                    }
+
+                mHeadView.onLoading();
+                if (mOnRefreshListener != null) {
+                    mOnRefreshListener.onRefresh();
                 }
             }
         }
@@ -975,6 +968,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 interpolator = new DecelerateInterpolator();
             }
 
+            if (mStatus == STATUS_LOAD_MORE_PULL) {
+                mStatus = STATUS_LOAD_MORE_LOADING;
+            }
+
             if (mMove >= mFootViewHeight) {
                 float deltaY = (Math.abs(mMove) - mFootViewHeight)
                         * interpolator.getInterpolation(SMOOTH_REWIND_DURATION_MS / 1000f);
@@ -989,13 +986,12 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             if (mMove != mFootViewHeight) {
                 ViewCompat.postOnAnimation(mFootView, this);
             } else {
-                if (mStatus == STATUS_LOAD_MORE_PULL) {
-                    mStatus = STATUS_LOAD_MORE_LOADING;
-                    mFootView.onLoading();
-                    if (mOnLoadMoreListener != null) {
-                        mOnLoadMoreListener.onLoadMore();
-                    }
+
+                mFootView.onLoading();
+                if (mOnLoadMoreListener != null) {
+                    mOnLoadMoreListener.onLoadMore();
                 }
+
             }
         }
     }
