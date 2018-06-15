@@ -8,7 +8,6 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
-import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -213,7 +212,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             mContentWrapper.removeView(mLoadingView);
         }
         mLoadingView = loadingView;
-        addStatusView(loadingView);
+        addStatusView(mLoadingView);
     }
 
     /**
@@ -226,7 +225,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             mContentWrapper.removeView(mEmptyView);
         }
         mEmptyView = emptyView;
-        addStatusView(emptyView);
+        addStatusView(mEmptyView);
     }
 
     /**
@@ -239,7 +238,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             mContentWrapper.removeView(mErrorView);
         }
         mErrorView = errorView;
-        addStatusView(errorView);
+        addStatusView(mErrorView);
     }
 
     /**
@@ -280,6 +279,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * show loading status view
      */
     public final void toLoading() {
+        if (!isSafeStatus()) {
+            onRefreshComplete();
+        }
         if (mStatus == STATUS_LOADING) {
             return;
         }
@@ -298,6 +300,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * show empty status view
      */
     public final void toEmpty() {
+        if (!isSafeStatus()) {
+            onRefreshComplete();
+        }
         if (mStatus == STATUS_EMPTY) {
             return;
         }
@@ -316,6 +321,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * show empty status view
      */
     public final void toError() {
+        if (!isSafeStatus()) {
+            onRefreshComplete();
+        }
         if (mStatus == STATUS_ERROR) {
             return;
         }
@@ -334,6 +342,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * show content view / standard status
      */
     public final void toContent() {
+        if (!isSafeStatus()) {
+            onRefreshComplete();
+        }
         if (mStatus == STATUS_STANDER) {
             return;
         }
@@ -346,6 +357,39 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         if (mLoadingView != null) {
             mLoadingView.onLoadingEnd();
         }
+    }
+
+    /**
+     * onRefresh
+     */
+    public void onRefresh() {
+        if (mOnRefreshListener != null) {
+            mOnRefreshListener.onRefresh();
+        }
+    }
+
+    /**
+     * onLoadMore
+     */
+    public void onLoadMore() {
+        if (mOnLoadMoreListener != null) {
+            mOnLoadMoreListener.onLoadMore();
+        }
+    }
+
+    /**
+     * check if save to change status
+     *
+     * @return
+     */
+    private boolean isSafeStatus() {
+        if (mStatus == STATUS_STANDER
+                || mStatus == STATUS_LOADING
+                || mStatus == STATUS_EMPTY
+                || mStatus == STATUS_ERROR) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -432,6 +476,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             } else {
                 paddingT = -mHeadViewHeight;
             }
+
         } else {
             if (shouldShowHeadView()) {
                 paddingL = 0;
@@ -508,6 +553,18 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      */
     protected boolean shouldShowHeadView() {
         if (isReadyToRefresh() && mStatus == STATUS_REFRESH_PULL) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * check if should show footView
+     *
+     * @return
+     */
+    protected boolean shouldShowFootView() {
+        if (isReadyToLoadMore() && mStatus == STATUS_LOAD_MORE_PULL) {
             return true;
         }
         return false;
@@ -788,7 +845,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 mHeadViewRewindRunnable = new HeadViewRewindRunnable();
             }
             mHeadView.post(mHeadViewRewindRunnable);
-        } else {
+        } else if (mMove > 0) {
             if (mFootViewRewindRunnable == null) {
                 mFootViewRewindRunnable = new FootViewRewindRunnable();
             }
