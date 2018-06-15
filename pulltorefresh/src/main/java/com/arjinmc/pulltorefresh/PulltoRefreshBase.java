@@ -64,7 +64,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * mark for is first init
      */
     private boolean isFirstInit;
-
+    /**
+     * mark for do next status when onRefresh complete
+     */
+    private int mDoNextStatus = -1;
     private int mHeadViewHeight;
     private int mFootViewHeight;
     private boolean mHeadViewShowReleaseTips;
@@ -279,84 +282,95 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * show loading status view
      */
     public final void toLoading() {
-        if (!isSafeStatus()) {
-            onRefreshComplete();
-        }
-        if (mStatus == STATUS_LOADING) {
-            return;
-        }
-        showStatusView(mLoadingView);
-        hideStatusView(mEmptyView);
-        hideStatusView(mErrorView);
-        hideStatusView(mContentView);
-        mStatus = STATUS_LOADING;
-
-        if (mLoadingView != null) {
-            mLoadingView.onLoadingStart();
-        }
+        checkSwitchStatus(STATUS_LOADING);
     }
 
     /**
      * show empty status view
      */
     public final void toEmpty() {
-        if (!isSafeStatus()) {
-            onRefreshComplete();
-        }
-        if (mStatus == STATUS_EMPTY) {
-            return;
-        }
-        showStatusView(mEmptyView);
-        hideStatusView(mLoadingView);
-        hideStatusView(mErrorView);
-        hideStatusView(mContentView);
-        mStatus = STATUS_EMPTY;
-
-        if (mLoadingView != null) {
-            mLoadingView.onLoadingEnd();
-        }
+        checkSwitchStatus(STATUS_EMPTY);
     }
 
     /**
      * show empty status view
      */
     public final void toError() {
-        if (!isSafeStatus()) {
-            onRefreshComplete();
-        }
-        if (mStatus == STATUS_ERROR) {
-            return;
-        }
-        showStatusView(mErrorView);
-        hideStatusView(mLoadingView);
-        hideStatusView(mEmptyView);
-        hideStatusView(mContentView);
-        mStatus = STATUS_ERROR;
-
-        if (mLoadingView != null) {
-            mLoadingView.onLoadingEnd();
-        }
+        checkSwitchStatus(STATUS_ERROR);
     }
 
     /**
      * show content view / standard status
      */
     public final void toContent() {
-        if (!isSafeStatus()) {
-            onRefreshComplete();
-        }
-        if (mStatus == STATUS_STANDER) {
+        checkSwitchStatus(STATUS_STANDER);
+    }
+
+    /**
+     * check status if need to switch
+     *
+     * @param status
+     */
+    private void checkSwitchStatus(int status) {
+        if (status == mStatus) {
             return;
         }
-        showStatusView(mContentView);
+        if (mStatus == STATUS_REFRESH_PULL
+                || mStatus == STATUS_LOAD_MORE_PULL) {
+            return;
+        }
+        if (mStatus == STATUS_REFRESHING
+                || mStatus == STATUS_LOAD_MORE_LOADING) {
+            if (mDoNextStatus == status) {
+                return;
+            } else {
+                mDoNextStatus = status;
+            }
+            return;
+        }
+        switchStatus(status);
+    }
+
+    /**
+     * switch status
+     *
+     * @param status
+     */
+    private void switchStatus(int status) {
+        hideStatusView(mContentView);
         hideStatusView(mLoadingView);
         hideStatusView(mEmptyView);
         hideStatusView(mErrorView);
-        mStatus = STATUS_STANDER;
-
-        if (mLoadingView != null) {
-            mLoadingView.onLoadingEnd();
+        switch (status) {
+            case STATUS_LOADING:
+                showStatusView(mLoadingView);
+                if (mLoadingView != null) {
+                    mLoadingView.onLoadingStart();
+                }
+                break;
+            case STATUS_EMPTY:
+                showStatusView(mEmptyView);
+                if (mLoadingView != null) {
+                    mLoadingView.onLoadingEnd();
+                }
+                break;
+            case STATUS_ERROR:
+                showStatusView(mErrorView);
+                if (mLoadingView != null) {
+                    mLoadingView.onLoadingEnd();
+                }
+                break;
+            case STATUS_STANDER:
+            default:
+                showStatusView(mContentView);
+                if (mLoadingView != null) {
+                    mLoadingView.onLoadingEnd();
+                }
+                break;
         }
+        mStatus = status;
+        mDoNextStatus = -1;
+
     }
 
     /**
@@ -375,21 +389,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         if (mOnLoadMoreListener != null) {
             mOnLoadMoreListener.onLoadMore();
         }
-    }
-
-    /**
-     * check if save to change status
-     *
-     * @return
-     */
-    private boolean isSafeStatus() {
-        if (mStatus == STATUS_STANDER
-                || mStatus == STATUS_LOADING
-                || mStatus == STATUS_EMPTY
-                || mStatus == STATUS_ERROR) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -737,6 +736,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
+
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
                     if (getOrientation() == VERTICAL) {
                         mPointDown = ev.getY();
@@ -746,6 +746,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
+
                 float alter = 0;
                 if (getOrientation() == VERTICAL) {
                     alter = mPointDown - ev.getY();
@@ -875,6 +876,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             } else {
                 mStatus = STATUS_STANDER;
                 mHeadView.onReset();
+                if (mDoNextStatus != -1) {
+                    switchStatus(mDoNextStatus);
+                }
             }
         }
     }
@@ -950,6 +954,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             } else {
                 mStatus = STATUS_STANDER;
                 mFootView.onReset();
+                if (mDoNextStatus != -1) {
+                    switchStatus(mDoNextStatus);
+                }
             }
         }
     }
