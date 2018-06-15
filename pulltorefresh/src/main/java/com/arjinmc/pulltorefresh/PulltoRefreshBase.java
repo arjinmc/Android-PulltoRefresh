@@ -8,6 +8,7 @@ import android.support.v4.view.ViewCompat;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -629,6 +630,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        Log.d("onTouchEvent", mStatus + "");
         if (mStatus == STATUS_REFRESHING
                 || (mStatus == STATUS_LOAD_MORE_LOADING)) {
             return true;
@@ -636,6 +638,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                Log.d("onTouchEvent", "ACTION_DOWN");
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
                     if (getOrientation() == VERTICAL) {
                         mPointDown = event.getY();
@@ -645,6 +648,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
+                Log.d("onTouchEvent", "ACTION_MOVE");
                 if (!(mStatus == STATUS_REFRESH_PULL
                         || mStatus == STATUS_LOAD_MORE_PULL)) {
                     return false;
@@ -670,13 +674,11 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         }
                         updateHeadView();
                     } else {
-                        mStatus = STATUS_STANDER;
                         mMove = 0;
                         updateHeadView();
                         return false;
                     }
                 } else if (mMove == 0f) {
-                    mStatus = STATUS_STANDER;
                     mMove = 0;
                     return false;
                 } else {
@@ -688,7 +690,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         }
                         updateFootView();
                     } else {
-                        mStatus = STATUS_STANDER;
                         mMove = 0;
                         updateFootView();
                         return false;
@@ -697,6 +698,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
                 break;
             case MotionEvent.ACTION_UP:
+                Log.d("onTouchEvent", "ACTION_UP");
                 if (mMove < 0) {
                     if (Math.abs(mMove) < mHeadViewHeight) {
                         if (mHeadViewRewindRunnable == null) {
@@ -709,9 +711,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         }
                         mHeadView.post(mHeadViewStartRefreshRunnable);
                     }
-                } else if (mMove == 0f) {
-                    mStatus = STATUS_STANDER;
-                } else {
+                } else if (mMove > 0) {
                     if (Math.abs(mMove) < mFootViewHeight) {
                         if (mFootViewRewindRunnable == null) {
                             mFootViewRewindRunnable = new FootViewRewindRunnable();
@@ -735,6 +735,8 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
 
+        Log.d("onInterceptTouchEvent", mStatus + "");
+
         if (mStatus == STATUS_REFRESHING
                 || mStatus == STATUS_LOAD_MORE_LOADING) {
             return true;
@@ -742,6 +744,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                Log.d("onInterceptTouchEvent", "ACTION_DOWN");
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
                     if (getOrientation() == VERTICAL) {
                         mPointDown = ev.getY();
@@ -751,6 +754,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
+                Log.d("onInterceptTouchEvent", "ACTION_DOWN");
                 float alter = 0;
                 if (getOrientation() == VERTICAL) {
                     alter = mPointDown - ev.getY();
@@ -767,9 +771,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         && isReadyToRefresh() && alter < 0 && isRefreshEnable) {
                     mStatus = STATUS_REFRESH_PULL;
                     return true;
-                } else if (mMove == 0) {
-                    mStatus = STATUS_STANDER;
-                    return false;
                 } else if (mMove > 0 && mStatus == STATUS_STANDER
                         && isReadyToLoadMore() && alter > 0 && isLoadMoreEnable) {
                     mStatus = STATUS_LOAD_MORE_PULL;
