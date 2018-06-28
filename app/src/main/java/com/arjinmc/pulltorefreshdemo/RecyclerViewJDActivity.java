@@ -45,6 +45,7 @@ public class RecyclerViewJDActivity extends AppCompatActivity {
 
         mPtrRecyclerView = findViewById(R.id.ptr_recyclerview);
         mPtrRecyclerView.setHeadView(new JDHeadView(this));
+//        mPtrRecyclerView.setHeadView(new RingHeadView(this));
         mPtrRecyclerView.setLoadMoreEnable(false);
         mDataList = new ArrayList<>();
 

@@ -56,7 +56,6 @@ public class JDHeadView extends PullLayout {
         mFigureAnim = (AnimationDrawable) mIvFigure.getBackground();
         mTwinkleAnim = AnimationUtils.loadAnimation(getContext(), R.anim.anim_twinkle);
         addView(view, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        requestLayout();
     }
 
     @Override
