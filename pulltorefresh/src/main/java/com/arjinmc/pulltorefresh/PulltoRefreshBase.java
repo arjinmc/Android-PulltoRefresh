@@ -44,6 +44,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     private static final int STATUS_EMPTY = 6;
     private static final int STATUS_ERROR = 7;
 
+    //action to show/hide head or foot view
+    private static final int ACTION_SHOW_VIEW = 0;
+    private static final int ACTION_HIDE_VIEW = 1;
+
     private static final int SMOOTH_REWIND_DURATION_MS = 100;
 
     private PullLayout mHeadView;
@@ -68,6 +72,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * mark for do next status when onRefresh complete
      */
     private int mDoNextStatus = -1;
+    private int mDoChangeHeadView = -1;
+    private int mDoChangeFootView = -1;
+
     private int mHeadViewHeight;
     private int mFootViewHeight;
     private boolean mHeadViewShowReleaseTips;
@@ -183,8 +190,12 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * @param enable
      */
     public void setRefreshEnable(boolean enable) {
-        isRefreshEnable = enable;
-        updateUI();
+        if (mStatus == STATUS_REFRESHING || mStatus == STATUS_LOAD_MORE_LOADING) {
+            mDoChangeHeadView = enable ? ACTION_SHOW_VIEW : ACTION_HIDE_VIEW;
+        } else {
+            isRefreshEnable = enable;
+            updateUI();
+        }
     }
 
     public boolean isRefreshEnable() {
@@ -197,8 +208,12 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * @param enable
      */
     public void setLoadMoreEnable(boolean enable) {
-        isLoadMoreEnable = enable;
-        updateUI();
+        if (mStatus == STATUS_REFRESHING || mStatus == STATUS_LOAD_MORE_LOADING) {
+            mDoChangeFootView = enable ? ACTION_SHOW_VIEW : ACTION_HIDE_VIEW;
+        } else {
+            isLoadMoreEnable = enable;
+            updateUI();
+        }
     }
 
     public boolean isLoadMoreEnable() {
@@ -371,6 +386,35 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         mStatus = status;
         mDoNextStatus = -1;
 
+    }
+
+    /**
+     * switch head and foot view for the mark when on refreshing or loading more status
+     */
+    private void switchHeadAndFootView() {
+        if (mDoChangeHeadView != -1) {
+            switch (mDoChangeHeadView) {
+                case ACTION_SHOW_VIEW:
+                    setRefreshEnable(true);
+                    break;
+                case ACTION_HIDE_VIEW:
+                    setRefreshEnable(false);
+                    break;
+            }
+            mDoChangeHeadView = -1;
+        }
+
+        if (mDoChangeFootView != -1) {
+            switch (mDoChangeFootView) {
+                case ACTION_SHOW_VIEW:
+                    setLoadMoreEnable(true);
+                    break;
+                case ACTION_HIDE_VIEW:
+                    setLoadMoreEnable(false);
+                    break;
+            }
+            mDoChangeFootView = -1;
+        }
     }
 
     /**
@@ -879,6 +923,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 if (mDoNextStatus != -1) {
                     switchStatus(mDoNextStatus);
                 }
+                switchHeadAndFootView();
             }
         }
     }
@@ -957,6 +1002,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 if (mDoNextStatus != -1) {
                     switchStatus(mDoNextStatus);
                 }
+                switchHeadAndFootView();
             }
         }
     }
