@@ -761,6 +761,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         }
                         mFootView.post(mFootViewStartRefreshRunnable);
                     }
+                } else {
+                    //when mMove = 0,back to stander status
+                    mStatus = STATUS_STANDER;
                 }
                 mPointDown = 0;
                 break;

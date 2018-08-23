@@ -12,7 +12,7 @@ This repo has been added to JCenter.
 <dependency>
   <groupId>com.arjinmc.android</groupId>
   <artifactId>pulltorefresh</artifactId>
-  <version>1.1.4</version>
+  <version>1.1.5</version>
   <type>pom</type>
 </dependency>
 ```
@@ -20,7 +20,7 @@ This repo has been added to JCenter.
 ##### gradle
 
 ```code
-compile 'com.arjinmc.android:pulltorefresh:1.1.4'
+compile 'com.arjinmc.android:pulltorefresh:1.1.5'
 ```
 
 ## Features
@@ -29,7 +29,7 @@ Supports both Pulling Down from the top, and Pulling Up from the bottom (or even
 - [x] RecyclerView
 - [x] ScrollView
 - [x] HorizontalScrollView
-- [x] NestScrollView
+- [x] NestedScrollView
 
 ![image](https://github.com/arjinmc/Android-PulltoRefresh/blob/master/images/sample.gif)
 ```code
