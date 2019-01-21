@@ -12,7 +12,7 @@ This repo has been added to JCenter.
 <dependency>
   <groupId>com.arjinmc.android</groupId>
   <artifactId>pulltorefresh</artifactId>
-  <version>1.1.5</version>
+  <version>1.1.6</version>
   <type>pom</type>
 </dependency>
 ```
@@ -20,7 +20,7 @@ This repo has been added to JCenter.
 ##### gradle
 
 ```code
-compile 'com.arjinmc.android:pulltorefresh:1.1.5'
+compile 'com.arjinmc.android:pulltorefresh:1.1.6'
 ```
 
 ## Features
