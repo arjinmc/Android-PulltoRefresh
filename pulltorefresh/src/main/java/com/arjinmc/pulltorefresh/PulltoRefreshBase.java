@@ -81,6 +81,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     private boolean mFootViewShowReleaseTips;
 
     private float mPointDown;
+    private float mPointDownX;
     private float mMove;
 
     // Runnable for headView to rewind for pulling to refresh
@@ -482,8 +483,8 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                     mFootView.measure(0, 0);
                     mFootViewHeight = mFootView.getMeasuredWidth();
 
-                    addView(mFootView, new LinearLayout.LayoutParams(mFootViewHeight
-                            , LayoutParams.MATCH_PARENT));
+                    addView(mFootView, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT
+                            , mFootViewHeight));
                 }
             } else {
                 mFootViewHeight = 0;
@@ -680,6 +681,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
+                    mPointDownX = event.getX();
                     if (getOrientation() == VERTICAL) {
                         mPointDown = event.getY();
                     } else {
@@ -766,6 +768,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                     mStatus = STATUS_STANDER;
                 }
                 mPointDown = 0;
+                mPointDownX = 0;
                 break;
             default:
                 break;
@@ -785,6 +788,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             case MotionEvent.ACTION_DOWN:
 
                 if (isReadyToRefresh() || isReadyToLoadMore()) {
+                    mPointDownX = ev.getX();
                     if (getOrientation() == VERTICAL) {
                         mPointDown = ev.getY();
                     } else {
@@ -794,6 +798,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 break;
             case MotionEvent.ACTION_MOVE:
 
+                if (mPointDownX != ev.getX() && Math.abs(mPointDownX - ev.getX()) <= 8) {
+                    return false;
+                }
                 float alter = 0;
                 if (getOrientation() == VERTICAL) {
                     alter = mPointDown - ev.getY();
@@ -821,6 +828,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         || mStatus == STATUS_LOAD_MORE_PULL) {
                     return true;
                 }
+                break;
+            case MotionEvent.ACTION_UP:
+                mPointDownX = 0;
                 break;
             default:
                 break;

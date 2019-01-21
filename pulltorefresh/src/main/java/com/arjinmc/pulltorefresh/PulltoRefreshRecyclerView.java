@@ -110,6 +110,10 @@ public class PulltoRefreshRecyclerView extends PulltoRefreshBase<RecyclerView> {
             return false;
         }
 
+        if (recyclerView.getAdapter() == null || recyclerView.getAdapter().getItemCount() == 0) {
+            return false;
+        }
+
         RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
         if (layoutManager instanceof LinearLayoutManager) {
             if (((LinearLayoutManager) layoutManager).findLastCompletelyVisibleItemPosition()
