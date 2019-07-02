@@ -3,9 +3,6 @@ package com.arjinmc.pulltorefreshdemo.view;
 import android.content.Context;
 import android.graphics.drawable.AnimationDrawable;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,6 +10,10 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.arjinmc.pulltorefresh.view.PullLayout;
 import com.arjinmc.pulltorefreshdemo.R;

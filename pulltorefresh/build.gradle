@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 8
-        versionName "1.1.6"
+        versionCode 9
+        versionName "2.0"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -26,9 +26,9 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'com.android.support:appcompat-v7:' + rootProject.ext.supportLibVersion
-    implementation 'com.android.support:recyclerview-v7:' + rootProject.ext.supportLibVersion
+    implementation 'androidx.appcompat:appcompat:'+ rootProject.ext.supportLibVersion
+    implementation 'androidx.recyclerview:recyclerview:'+ rootProject.ext.recyclerviewVersion
     testImplementation 'junit:junit:' + rootProject.ext.junitVersion
-    androidTestImplementation 'com.android.support.test:runner:' + rootProject.ext.testRunnerVersion
-    androidTestImplementation 'com.android.support.test.espresso:espresso-core:' + rootProject.ext.espressoVersion
+    androidTestImplementation 'androidx.test:runner:' + rootProject.ext.testRunnerVersion
+    androidTestImplementation 'androidx.test.espresso:espresso-core:' + rootProject.ext.espressoVersion
 }

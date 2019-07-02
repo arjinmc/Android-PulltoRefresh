@@ -2,13 +2,14 @@ package com.arjinmc.pulltorefreshdemo.view;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import com.arjinmc.pulltorefresh.PulltoRefreshRecyclerView;
 import com.arjinmc.pulltorefresh.view.DefaultEmptyLayout;
@@ -62,6 +63,8 @@ public class MyPullListView extends PulltoRefreshRecyclerView {
                 }
             }
         });
+        setEmptyCanPull(true);
+        setErrorCanPull(true);
     }
 
     public void setOnErrorCallback(OnErrorCallback onErrorCallback) {
