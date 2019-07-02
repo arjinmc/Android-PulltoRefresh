@@ -718,6 +718,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+
         if (mStatus == STATUS_REFRESHING
                 || (mStatus == STATUS_LOAD_MORE_LOADING)) {
             return true;
@@ -809,7 +810,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         mFootView.post(mFootViewStartRefreshRunnable);
                     }
                 } else {
-                    //when mMove = 0,back to stander status
+                    //when mMove = 0,back to store status
                     mStatus = mStoreStatus;
                 }
                 mPointDown = 0;
@@ -857,6 +858,12 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                     alter = mPointDown - ev.getX();
                 }
                 mMove += alter;
+
+                if (mMove == 0) {
+                    mStatus = mStoreStatus;
+                    return false;
+                }
+
                 if (getOrientation() == VERTICAL) {
                     mPointDown = ev.getY();
                 } else {
