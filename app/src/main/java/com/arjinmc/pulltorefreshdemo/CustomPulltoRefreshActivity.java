@@ -58,6 +58,8 @@ public class CustomPulltoRefreshActivity extends AppCompatActivity implements Vi
         mRefreshFinishRunnable = new RefreshFinishRunnable();
 
         mPtrRecyclerView = findViewById(R.id.ptr_recyclerview);
+//        mPtrRecyclerView.setErrorCanPull(true);
+//        mPtrRecyclerView.setEmptyCanPull(true);
         mPtrRecyclerView.setOnErrorCallback(new MyPullListView.OnErrorCallback() {
             @Override
             public void onError() {

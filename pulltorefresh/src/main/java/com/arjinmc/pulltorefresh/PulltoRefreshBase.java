@@ -59,6 +59,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     private T mContentView;
     private int mStatus = STATUS_STANDER;
+    /**
+     * return back to the status before pull to refresh
+     */
+    private int mStoreStatus = mStatus;
     private boolean isRefreshEnable = true;
     private boolean isLoadMoreEnable = true;
     private int mOrientation = LinearLayout.VERTICAL;
@@ -95,6 +99,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     private OnLoadMoreListener mOnLoadMoreListener;
     private OnRefreshListener mOnRefreshListener;
+
+    //flag if empty / error view can pull this view
+    private boolean isEmptyCanPull, isErrorCanPull;
 
     public PulltoRefreshBase(Context context) {
         super(context);
@@ -261,6 +268,41 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     }
 
     /**
+     * set when empty view shown that this view can be pull or not
+     *
+     * @param canPull
+     */
+    public void setEmptyCanPull(boolean canPull) {
+        isEmptyCanPull = canPull;
+    }
+
+    /**
+     * set when error view shown that this view can be pull or not
+     *
+     * @param canPull
+     */
+    public void setErrorCanPull(boolean canPull) {
+        isErrorCanPull = canPull;
+    }
+
+    /**
+     * check the status if can be refreshed
+     *
+     * @return
+     */
+    private boolean isCanRefreshPullStatus() {
+        if (isEmptyCanPull && mStatus == STATUS_EMPTY) {
+            return true;
+        } else if (isErrorCanPull && mStatus == STATUS_ERROR) {
+            return true;
+        } else if (isReadyToRefresh() && mStatus == STATUS_STANDER) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * add status view for content wrapper
      *
      * @param view
@@ -335,6 +377,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 || mStatus == STATUS_LOAD_MORE_PULL) {
             return;
         }
+        mStoreStatus = status;
         if (mStatus == STATUS_REFRESHING
                 || mStatus == STATUS_LOAD_MORE_LOADING) {
             if (mDoNextStatus == status) {
@@ -596,7 +639,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
      * @return
      */
     protected boolean shouldShowHeadView() {
-        if (isReadyToRefresh() && mStatus == STATUS_REFRESH_PULL) {
+        if (isCanRefreshPullStatus() && mStatus == STATUS_REFRESH_PULL) {
             return true;
         }
         return false;
@@ -680,7 +723,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                if (isReadyToRefresh() || isReadyToLoadMore()) {
+                if (isCanRefreshPullStatus() || isReadyToLoadMore()) {
                     mPointDownX = event.getX();
                     if (getOrientation() == VERTICAL) {
                         mPointDown = event.getY();
@@ -765,7 +808,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                     }
                 } else {
                     //when mMove = 0,back to stander status
-                    mStatus = STATUS_STANDER;
+                    mStatus = mStoreStatus;
                 }
                 mPointDown = 0;
                 mPointDownX = 0;
@@ -787,7 +830,11 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
 
-                if (isReadyToRefresh() || isReadyToLoadMore()) {
+                if (isCanRefreshPullStatus() || isReadyToLoadMore()) {
+                    if ((isEmptyCanPull && mStoreStatus == STATUS_EMPTY)
+                            || (isErrorCanPull && mStoreStatus == STATUS_ERROR)) {
+                        mStatus = STATUS_REFRESH_PULL;
+                    }
                     mPointDownX = ev.getX();
                     if (getOrientation() == VERTICAL) {
                         mPointDown = ev.getY();
@@ -813,8 +860,8 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 } else {
                     mPointDown = ev.getX();
                 }
-                if (mMove < 0 && mStatus == STATUS_STANDER
-                        && isReadyToRefresh() && alter < 0 && isRefreshEnable) {
+                if (mMove < 0 && isCanRefreshPullStatus()
+                        && alter < 0 && isRefreshEnable) {
                     mStatus = STATUS_REFRESH_PULL;
                     return true;
                 } else if (mMove > 0 && mStatus == STATUS_STANDER
@@ -931,7 +978,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             if (mMove != 0) {
                 ViewCompat.postOnAnimation(mHeadView, this);
             } else {
-                mStatus = STATUS_STANDER;
+                mStatus = mStoreStatus;
                 mHeadView.onReset();
                 if (mDoNextStatus != -1) {
                     switchStatus(mDoNextStatus);
@@ -1010,7 +1057,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             if (mMove != 0) {
                 ViewCompat.postOnAnimation(mFootView, this);
             } else {
-                mStatus = STATUS_STANDER;
+                mStatus = mStoreStatus;
                 mFootView.onReset();
                 if (mDoNextStatus != -1) {
                     switchStatus(mDoNextStatus);
