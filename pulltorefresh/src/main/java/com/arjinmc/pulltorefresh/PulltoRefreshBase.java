@@ -97,6 +97,8 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     private Runnable mFootViewRewindRunnable;
     //Runnable for footView to start load more
     private Runnable mFootViewStartRefreshRunnable;
+    //Mark for animation is playing or not
+    private boolean mIsAnimationPlaying;
 
     private OnLoadMoreListener mOnLoadMoreListener;
     private OnRefreshListener mOnRefreshListener;
@@ -136,6 +138,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
         mHeadView = new DefaultVerticalPullHeadLayout(context, attrs);
         mFootView = new DefaultVerticalPullFootLayout(context, attrs);
         updateUI();
+
     }
 
     private void addContentView(Context context, T contentView) {
@@ -736,8 +739,8 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                if (!(mStatus == STATUS_REFRESH_PULL
-                        || mStatus == STATUS_LOAD_MORE_PULL)) {
+
+                if (!(mStatus == STATUS_REFRESH_PULL || mStatus == STATUS_LOAD_MORE_PULL)) {
                     return false;
                 }
                 float alter = 0;
@@ -785,29 +788,38 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
                 break;
             case MotionEvent.ACTION_UP:
+
                 if (mMove < 0) {
                     if (Math.abs(mMove) < mHeadViewHeight) {
                         if (mHeadViewRewindRunnable == null) {
                             mHeadViewRewindRunnable = new HeadViewRewindRunnable();
                         }
-                        mHeadView.post(mHeadViewRewindRunnable);
+                        if (!mIsAnimationPlaying) {
+                            mHeadView.post(mHeadViewRewindRunnable);
+                        }
                     } else {
                         if (mHeadViewStartRefreshRunnable == null) {
                             mHeadViewStartRefreshRunnable = new HeadViewStartRefreshRunnable();
                         }
-                        mHeadView.post(mHeadViewStartRefreshRunnable);
+                        if (!mIsAnimationPlaying) {
+                            mHeadView.post(mHeadViewStartRefreshRunnable);
+                        }
                     }
                 } else if (mMove > 0) {
                     if (Math.abs(mMove) < mFootViewHeight) {
                         if (mFootViewRewindRunnable == null) {
                             mFootViewRewindRunnable = new FootViewRewindRunnable();
                         }
-                        mFootView.post(mFootViewRewindRunnable);
+                        if (!mIsAnimationPlaying) {
+                            mFootView.post(mFootViewRewindRunnable);
+                        }
                     } else {
                         if (mFootViewStartRefreshRunnable == null) {
                             mFootViewStartRefreshRunnable = new FootViewStartRefreshRunnable();
                         }
-                        mFootView.post(mFootViewStartRefreshRunnable);
+                        if (!mIsAnimationPlaying) {
+                            mFootView.post(mFootViewStartRefreshRunnable);
+                        }
                     }
                 } else {
                     //when mMove = 0,back to store status
@@ -986,7 +998,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             updateHeadView();
             if (mMove != 0) {
                 ViewCompat.postOnAnimation(mHeadView, this);
+                mIsAnimationPlaying = true;
             } else {
+                mIsAnimationPlaying = false;
                 mStatus = mStoreStatus;
                 mHeadView.onReset();
                 if (mDoNextStatus != -1) {
@@ -1028,8 +1042,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             updateHeadView();
             if (mMove != -mHeadViewHeight) {
                 ViewCompat.postOnAnimation(mHeadView, this);
+                mIsAnimationPlaying = true;
             } else {
-
+                mIsAnimationPlaying = false;
                 mHeadView.onLoading();
                 if (mOnRefreshListener != null) {
                     mOnRefreshListener.onRefresh();
@@ -1065,7 +1080,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             updateFootView();
             if (mMove != 0) {
                 ViewCompat.postOnAnimation(mFootView, this);
+                mIsAnimationPlaying = true;
             } else {
+                mIsAnimationPlaying = false;
                 mStatus = mStoreStatus;
                 mFootView.onReset();
                 if (mDoNextStatus != -1) {
@@ -1107,8 +1124,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             updateFootView();
             if (mMove != mFootViewHeight) {
                 ViewCompat.postOnAnimation(mFootView, this);
+                mIsAnimationPlaying = true;
             } else {
 
+                mIsAnimationPlaying = false;
                 mFootView.onLoading();
                 if (mOnLoadMoreListener != null) {
                     mOnLoadMoreListener.onLoadMore();
