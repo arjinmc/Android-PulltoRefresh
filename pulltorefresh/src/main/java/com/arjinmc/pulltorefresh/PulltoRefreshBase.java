@@ -3,6 +3,7 @@ package com.arjinmc.pulltorefresh;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,8 @@ import com.arjinmc.pulltorefresh.view.DefaultVerticalPullHeadLayout;
 import com.arjinmc.pulltorefresh.view.LoadingLayout;
 import com.arjinmc.pulltorefresh.view.PullLayout;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * PulltoRefreshView
  * Created by Eminem Lo on 2018/5/30.
@@ -44,6 +47,13 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     private static final int STATUS_LOADING = 5;
     private static final int STATUS_EMPTY = 6;
     private static final int STATUS_ERROR = 7;
+
+    //animation type
+    private static final int ANIMATION_TYPE_NONE = -1;
+    private static final int ANIMATION_TYPE_HEAD_VIEW_START = 0;
+    private static final int ANIMATION_TYPE_HEAD_VIEW_REWIND = 1;
+    private static final int ANIMATION_TYPE_FOOT_VIEW_START = 2;
+    private static final int ANIMATION_TYPE_FOOT_VIEW_REWIND = 3;
 
     //action to show/hide head or foot view
     private static final int ACTION_SHOW_VIEW = 0;
@@ -98,7 +108,9 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     //Runnable for footView to start load more
     private Runnable mFootViewStartRefreshRunnable;
     //Mark for animation is playing or not
-    private boolean mIsAnimationPlaying;
+    private ReentrantLock mIsAnimationPlaying = new ReentrantLock(false);
+    //Animation type for which animation is playing
+    private int mCurrentAnimationType = ANIMATION_TYPE_NONE;
 
     private OnLoadMoreListener mOnLoadMoreListener;
     private OnRefreshListener mOnRefreshListener;
@@ -722,6 +734,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
+        if (Build.VERSION.SDK_INT >= 19) {
+            Log.e("onTouchEvent", MotionEvent.actionToString(event.getAction()));
+        }
+
         if (mStatus == STATUS_REFRESHING
                 || (mStatus == STATUS_LOAD_MORE_LOADING)) {
             return true;
@@ -790,18 +806,19 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             case MotionEvent.ACTION_UP:
 
                 if (mMove < 0) {
+                    Log.e("mIsAnimation.isLocked()", "" + mIsAnimationPlaying.isLocked());
                     if (Math.abs(mMove) < mHeadViewHeight) {
                         if (mHeadViewRewindRunnable == null) {
                             mHeadViewRewindRunnable = new HeadViewRewindRunnable();
                         }
-                        if (!mIsAnimationPlaying) {
+                        if (!mIsAnimationPlaying.isLocked()) {
                             mHeadView.post(mHeadViewRewindRunnable);
                         }
                     } else {
                         if (mHeadViewStartRefreshRunnable == null) {
                             mHeadViewStartRefreshRunnable = new HeadViewStartRefreshRunnable();
                         }
-                        if (!mIsAnimationPlaying) {
+                        if (!mIsAnimationPlaying.isLocked()) {
                             mHeadView.post(mHeadViewStartRefreshRunnable);
                         }
                     }
@@ -810,14 +827,14 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                         if (mFootViewRewindRunnable == null) {
                             mFootViewRewindRunnable = new FootViewRewindRunnable();
                         }
-                        if (!mIsAnimationPlaying) {
+                        if (!mIsAnimationPlaying.isLocked()) {
                             mFootView.post(mFootViewRewindRunnable);
                         }
                     } else {
                         if (mFootViewStartRefreshRunnable == null) {
                             mFootViewStartRefreshRunnable = new FootViewStartRefreshRunnable();
                         }
-                        if (!mIsAnimationPlaying) {
+                        if (!mIsAnimationPlaying.isLocked()) {
                             mFootView.post(mFootViewStartRefreshRunnable);
                         }
                     }
@@ -836,6 +853,10 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+
+        if (Build.VERSION.SDK_INT >= 19) {
+            Log.e("onInterceptTouchEvent", MotionEvent.actionToString(ev.getAction()));
+        }
 
         if (mStatus == STATUS_REFRESHING
                 || mStatus == STATUS_LOAD_MORE_LOADING) {
@@ -931,6 +952,7 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     @Override
     protected final void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        Log.e("onSizeChanged", "onSizeChanged");
 
         refreshLoadingViewsSize();
 
@@ -997,10 +1019,13 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             }
             updateHeadView();
             if (mMove != 0) {
-                ViewCompat.postOnAnimation(mHeadView, this);
-                mIsAnimationPlaying = true;
+                if (canPlayAnimation(ANIMATION_TYPE_HEAD_VIEW_REWIND)) {
+                    ViewCompat.postOnAnimation(mHeadView, this);
+                    lockAnimation();
+                    mCurrentAnimationType = ANIMATION_TYPE_HEAD_VIEW_REWIND;
+                }
             } else {
-                mIsAnimationPlaying = false;
+                unlockAnimation();
                 mStatus = mStoreStatus;
                 mHeadView.onReset();
                 if (mDoNextStatus != -1) {
@@ -1041,10 +1066,13 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             }
             updateHeadView();
             if (mMove != -mHeadViewHeight) {
-                ViewCompat.postOnAnimation(mHeadView, this);
-                mIsAnimationPlaying = true;
+                if (canPlayAnimation(mCurrentAnimationType)) {
+                    ViewCompat.postOnAnimation(mHeadView, this);
+                    lockAnimation();
+                    mCurrentAnimationType = ANIMATION_TYPE_HEAD_VIEW_START;
+                }
             } else {
-                mIsAnimationPlaying = false;
+                unlockAnimation();
                 mHeadView.onLoading();
                 if (mOnRefreshListener != null) {
                     mOnRefreshListener.onRefresh();
@@ -1079,10 +1107,13 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             }
             updateFootView();
             if (mMove != 0) {
-                ViewCompat.postOnAnimation(mFootView, this);
-                mIsAnimationPlaying = true;
+                if (canPlayAnimation(ANIMATION_TYPE_FOOT_VIEW_REWIND)) {
+                    ViewCompat.postOnAnimation(mFootView, this);
+                    lockAnimation();
+                    mCurrentAnimationType = ANIMATION_TYPE_FOOT_VIEW_REWIND;
+                }
             } else {
-                mIsAnimationPlaying = false;
+                unlockAnimation();
                 mStatus = mStoreStatus;
                 mFootView.onReset();
                 if (mDoNextStatus != -1) {
@@ -1123,17 +1154,45 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             }
             updateFootView();
             if (mMove != mFootViewHeight) {
-                ViewCompat.postOnAnimation(mFootView, this);
-                mIsAnimationPlaying = true;
+                if (canPlayAnimation(ANIMATION_TYPE_FOOT_VIEW_START)) {
+                    ViewCompat.postOnAnimation(mFootView, this);
+                    lockAnimation();
+                    mCurrentAnimationType = ANIMATION_TYPE_FOOT_VIEW_START;
+                }
             } else {
 
-                mIsAnimationPlaying = false;
+                unlockAnimation();
                 mFootView.onLoading();
                 if (mOnLoadMoreListener != null) {
                     mOnLoadMoreListener.onLoadMore();
                 }
-
             }
         }
+    }
+
+    private void lockAnimation() {
+        if (!mIsAnimationPlaying.isLocked()) {
+            mIsAnimationPlaying.tryLock();
+        }
+    }
+
+    private void unlockAnimation() {
+        if (mIsAnimationPlaying.isLocked()) {
+            mIsAnimationPlaying.unlock();
+            mCurrentAnimationType = ANIMATION_TYPE_NONE;
+        }
+    }
+
+    /**
+     * check if can play animation
+     *
+     * @param animationType
+     * @return
+     */
+    private boolean canPlayAnimation(int animationType) {
+        if (mCurrentAnimationType == ANIMATION_TYPE_NONE || mCurrentAnimationType == animationType) {
+            return true;
+        }
+        return false;
     }
 }
