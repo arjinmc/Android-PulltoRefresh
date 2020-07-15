@@ -3,7 +3,6 @@ package com.arjinmc.pulltorefresh;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -734,10 +733,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        if (Build.VERSION.SDK_INT >= 19) {
-            Log.e("onTouchEvent", MotionEvent.actionToString(event.getAction()));
-        }
-
         if (mStatus == STATUS_REFRESHING
                 || (mStatus == STATUS_LOAD_MORE_LOADING)) {
             return true;
@@ -806,7 +801,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
             case MotionEvent.ACTION_UP:
 
                 if (mMove < 0) {
-                    Log.e("mIsAnimation.isLocked()", "" + mIsAnimationPlaying.isLocked());
                     if (Math.abs(mMove) < mHeadViewHeight) {
                         if (mHeadViewRewindRunnable == null) {
                             mHeadViewRewindRunnable = new HeadViewRewindRunnable();
@@ -853,10 +847,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-
-        if (Build.VERSION.SDK_INT >= 19) {
-            Log.e("onInterceptTouchEvent", MotionEvent.actionToString(ev.getAction()));
-        }
 
         if (mStatus == STATUS_REFRESHING
                 || mStatus == STATUS_LOAD_MORE_LOADING) {
@@ -952,7 +942,6 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
     @Override
     protected final void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        Log.e("onSizeChanged", "onSizeChanged");
 
         refreshLoadingViewsSize();
 
