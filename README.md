@@ -6,6 +6,21 @@ Reference to [Android-PullToRefresh](https://github.com/chrisbanes/Android-PullT
 ## Import
 
 This repo has been added to JCenter.
+
+##### JitPack
+```code
+//root build.gradle
+allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+
+dependencies {
+        implementation 'com.github.arjinmc:RecyclerViewDecoration:2.1.1'
+}
+```
 ##### maven
 
 ```code
