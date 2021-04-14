@@ -11,14 +11,14 @@ This repo has been added to JCenter.
 ```code
 //root build.gradle
 allprojects {
-		repositories {
-			...
-			maven { url 'https://jitpack.io' }
-		}
-	}
+    repositories {
+        ...
+        maven { url 'https://jitpack.io' }
+    }
+}
 
 dependencies {
-        implementation 'com.github.arjinmc:RecyclerViewDecoration:2.1.1'
+        implementation 'com.github.arjinmc:Android-PulltoRefresh:2.1.1'
 }
 ```
 ##### maven
