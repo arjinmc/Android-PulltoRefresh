@@ -14,7 +14,7 @@ import com.arjinmc.expandrecyclerview.adapter.RecyclerViewAdapter;
 import com.arjinmc.expandrecyclerview.adapter.RecyclerViewSingleTypeProcessor;
 import com.arjinmc.expandrecyclerview.adapter.RecyclerViewViewHolder;
 import com.arjinmc.expandrecyclerview.style.RecyclerViewStyleHelper;
-import com.arjinmc.recyclerviewdecoration.RecyclerViewItemDecoration;
+import com.arjinmc.recyclerviewdecoration.RecyclerViewLinearItemDecoration;
 
 import java.util.Arrays;
 
@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
         RecyclerViewStyleHelper.toLinearLayout(mPtrRecyclerView, LinearLayout.VERTICAL);
         mPtrRecyclerView.addItemDecoration(
-                new RecyclerViewItemDecoration.Builder(this)
+                new RecyclerViewLinearItemDecoration.Builder(this)
                         .color(Color.GRAY)
                         .thickness(2)
                         .create());

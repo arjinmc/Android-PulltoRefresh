@@ -19,7 +19,7 @@ import com.arjinmc.pulltorefresh.listener.OnLoadMoreListener;
 import com.arjinmc.pulltorefresh.listener.OnRefreshListener;
 import com.arjinmc.pulltorefresh.view.DefaultHorizontalPullFootLayout;
 import com.arjinmc.pulltorefresh.view.DefaultHorizontalPullHeadLayout;
-import com.arjinmc.recyclerviewdecoration.RecyclerViewItemDecoration;
+import com.arjinmc.recyclerviewdecoration.RecyclerViewLinearItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +54,7 @@ public class RecyclerViewHorizontalActivity extends AppCompatActivity {
         mPtrRecyclerView.setFootView(new DefaultHorizontalPullFootLayout(this));
         mPtrRecyclerView.setOrientation(LinearLayout.HORIZONTAL);
         mPtrRecyclerView.getContentView().addItemDecoration(
-                new RecyclerViewItemDecoration.Builder(this)
+                new RecyclerViewLinearItemDecoration.Builder(this)
                         .color(Color.GRAY)
                         .thickness(2)
                         .paddingStart(10)
