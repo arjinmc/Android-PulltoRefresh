@@ -5,8 +5,6 @@ Reference to [Android-PullToRefresh](https://github.com/chrisbanes/Android-PullT
 
 ## Import
 
-This repo has been added to JCenter.
-
 ##### JitPack
 ```code
 //root build.gradle
@@ -18,24 +16,8 @@ allprojects {
 }
 
 dependencies {
-        implementation 'com.github.arjinmc:Android-PulltoRefresh:2.1.1'
+        implementation 'com.github.arjinmc:Android-PulltoRefresh:2.1.2'
 }
-```
-##### maven
-
-```code
-<dependency>
-  <groupId>com.arjinmc.android</groupId>
-  <artifactId>pulltorefresh</artifactId>
-  <version>2.1.1</version>
-  <type>pom</type>
-</dependency>
-```
-
-##### gradle
-
-```code
-compile 'com.arjinmc.android:pulltorefresh:2.1.1'
 ```
 
 ## Features

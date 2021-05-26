@@ -542,8 +542,8 @@ public abstract class PulltoRefreshBase<T extends View> extends LinearLayout {
                     mFootView.measure(0, 0);
                     mFootViewHeight = mFootView.getMeasuredWidth();
 
-                    addView(mFootView, new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT
-                            , mFootViewHeight));
+                    addView(mFootView, new LinearLayout.LayoutParams(
+                            mFootViewHeight, LayoutParams.MATCH_PARENT));
                 }
             } else {
                 mFootViewHeight = 0;
